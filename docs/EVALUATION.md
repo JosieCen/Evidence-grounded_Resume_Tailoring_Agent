@@ -16,28 +16,45 @@ The committed fictional fixture generates synthetic adversarial cases.
 | Forbidden wording | Block | Pass |
 | Untraceable number | Block | Pass |
 
-**Committed baseline: 7/7 passed (100%).**
+**Baseline: 7/7 passed (100%).**
 
-The machine-readable result is committed at `examples/evaluation_baseline.json`.
+The E2E demo also keeps an unsupported enterprise deployment/revenue requirement as a `GAP`. The adversarial `--simulate-unsafe-draft` path injects an unsupported production/revenue bullet; the deterministic audit removes it and re-audits before finalization.
 
-## 2. End-to-end safety behavior
+## 2. v0.2 retrieval benchmark
 
-The fictional JD intentionally includes one unsupported requirement related to enterprise deployment/revenue ownership. The baseline agent keeps it as a `GAP` instead of fabricating supporting evidence.
+`examples/retrieval_benchmark.yaml` contains six labeled fictional cases covering semantic paraphrases, a lexical control, and an explicit unsupported gap.
 
-The adversarial `--simulate-unsafe-draft` path injects an unsupported production/revenue bullet. The deterministic audit removes it and re-audits before finalization.
+### Aggregate results
 
-## 3. v0.2 semantic retrieval benchmark
+| Retriever | Top-1 accuracy | Recall@3 | Gap accuracy |
+| --- | ---: | ---: | ---: |
+| Lexical | 66.7% | 83.3% | 100% |
+| Embedding (`all-MiniLM-L6-v2`) | **83.3%** | **100%** | **100%** |
+| Hybrid (35% lexical / 65% semantic) | **83.3%** | **100%** | **100%** |
 
-`examples/retrieval_benchmark.yaml` adds six labeled fictional cases:
+The aggregate summary is committed at `examples/retrieval_baseline_summary.json`.
 
-- semantic communication paraphrase;
-- product/clinical requirement translation;
-- LLM safety review paraphrase;
-- provenance/automation paraphrase;
-- lexical-overlap control;
-- explicit unsupported gap control.
+### Most informative recovery
 
-Run the lightweight lexical baseline:
+Requirement:
+
+> Explain complex technical findings clearly to non-specialist audiences.
+
+- lexical: `GAP`;
+- embedding: `PARTIAL_MATCH` → `claim_scientific_communication`, score 0.3414;
+- hybrid: `PARTIAL_MATCH` → `claim_scientific_communication`, score 0.2219.
+
+This is the intended v0.2 behavior: semantic retrieval recovers a plausible paraphrase without changing the evidence authorization rules.
+
+### Remaining error
+
+The real embedding and hybrid runs both miss Top-1 on the `semantic_llm_safety` case: `claim_workflow_eval` ranks ahead of the expected `claim_llm_review_120`, although the expected claim remains inside Top-3. This is why Recall@3 reaches 100% while Top-1 remains 83.3%.
+
+That error is useful rather than hidden: the next calibration cycle should focus on reranking and threshold/weight tuning instead of claiming perfect retrieval.
+
+## 3. Running the benchmark
+
+Lexical:
 
 ```bash
 resume-agent benchmark-retrieval \
@@ -47,60 +64,38 @@ resume-agent benchmark-retrieval \
   --output outputs/lexical_benchmark.json
 ```
 
-Current lexical baseline on the six-case fixture:
-
-- **Top-1 accuracy: 66.7%**;
-- **Recall@3: 83.3%**;
-- **Gap accuracy: 100%**.
-
-The most informative miss is the zero-overlap paraphrase:
-
-> Explain complex technical findings clearly to non-specialist audiences.
-
-The lexical baseline returns `GAP`, creating a concrete target for embedding/hybrid retrieval.
-
-With the optional embedding dependency installed, compare:
+Embedding/hybrid:
 
 ```bash
+pip install -e ".[embedding]"
 resume-agent benchmark-retrieval --retriever embedding --output outputs/embedding_benchmark.json
 resume-agent benchmark-retrieval --retriever hybrid --output outputs/hybrid_benchmark.json
 ```
 
-The report contains:
+Reports contain top-1 accuracy, recall@3, explicit-gap accuracy, selected claim IDs, observed match level, and retrieval scores.
 
-- top-1 accuracy;
-- recall@3;
-- explicit-gap accuracy;
-- per-case selected claim IDs;
-- observed match level;
-- top retrieval score.
+## 4. CI strategy
 
-## 4. CI strategy in v0.2
+The lightweight CI runs on every push and currently passes **10 automated tests**. It also executes:
 
-The lightweight CI runs on every push and currently passes **10 automated tests**. It also executes the lexical E2E agent, factual-safety evaluation, and retrieval benchmark CLI.
+- lexical E2E agent run;
+- 7-case factual-safety evaluation;
+- lexical retrieval benchmark.
 
-Semantic retrieval logic is unit-tested with a deterministic embedding test double so ranking behavior can be validated without network/model downloads. The tests verify that:
+Semantic retrieval logic is unit-tested with a deterministic embedding test double, verifying semantic recovery without requiring a network/model download.
 
-- lexical retrieval can remain a gap when wording has no token overlap;
-- embedding retrieval can recover the intended semantically equivalent claim;
-- hybrid retrieval can also recover the claim;
-- an unrelated commercial requirement remains a gap;
-- benchmark metrics are machine-readable;
-- all original guardrail and E2E behavior remains intact.
+A separate **Semantic Retrieval Benchmark** GitHub Actions workflow installs Sentence Transformers 6.0.0, runs the real embedding and hybrid benchmark, and uploads both result JSON files as an artifact. The real-model integration workflow completed successfully on the v0.2 implementation.
 
-A separate **Semantic Retrieval Benchmark** workflow installs the real optional Sentence Transformers dependency and runs embedding + hybrid benchmark integrations whenever retrieval-related files change, or manually through `workflow_dispatch`.
+## 5. Next calibration metrics
 
-## 5. Metrics for the next calibration cycle
+A larger benchmark should track:
 
-The larger benchmark should track:
-
-- requirement-level top-1 accuracy;
-- recall@K;
+- top-1 accuracy and Recall@K;
 - strong/partial/gap classification accuracy;
 - false-positive semantic matches;
+- per-domain retrieval performance;
 - unsupported-claim rate after drafting;
-- claim traceability coverage;
-- metric traceability coverage;
+- claim/metric traceability coverage;
 - revision rate;
 - human preference for relevance/readability.
 
