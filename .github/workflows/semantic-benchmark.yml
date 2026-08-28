@@ -2,6 +2,13 @@ name: Semantic Retrieval Benchmark
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "src/evidence_grounded_resume_agent/retrieval.py"
+      - "src/evidence_grounded_resume_agent/retrieval_evaluation.py"
+      - "examples/retrieval_benchmark.yaml"
+      - "pyproject.toml"
+      - ".github/workflows/semantic-benchmark.yml"
 
 jobs:
   benchmark:
@@ -11,7 +18,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "pip"
       - run: python -m pip install --upgrade pip
       - run: pip install -e ".[embedding]"
       - name: Run embedding benchmark
