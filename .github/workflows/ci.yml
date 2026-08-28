@@ -17,3 +17,4 @@ jobs:
       - run: pytest
       - run: resume-agent run --profile examples/fictional_profile.yaml --jd examples/fictional_jd.md --output outputs/demo
       - run: resume-agent evaluate --profile examples/fictional_profile.yaml --output outputs/evaluation.json
+      - run: resume-agent benchmark-retrieval --profile examples/fictional_profile.yaml --benchmark examples/retrieval_benchmark.yaml --retriever lexical --output outputs/lexical_benchmark.json
