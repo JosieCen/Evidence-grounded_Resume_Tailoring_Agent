@@ -4,17 +4,15 @@
 
 A privacy-safe AI-agent showcase for **tailoring resume content to a job description without inventing experience**.
 
-**v0.2 adds pluggable semantic retrieval** while preserving the original deterministic factual-safety boundary. The system can run with lexical matching, Sentence Transformers embeddings, or a hybrid retriever. Semantic similarity can propose evidence; it can never authorize an unsupported claim.
+**v0.2 adds pluggable semantic retrieval** while preserving deterministic factual authorization. The system can run with lexical matching, Sentence Transformers embeddings, or a hybrid retriever. Semantic similarity can propose evidence; it cannot authorize an unsupported claim.
 
 > **Public-showcase boundary:** every person, organization, job description, metric and artifact in this repository is fictional. No private application data or real contact information is included.
 
 ## Product question
 
-Generic LLM resume rewriting can improve relevance, but it can also fabricate responsibilities, inflate partial matches, detach numbers from their evidence, or hide genuine gaps.
+Generic LLM resume rewriting can improve relevance, but it can also fabricate responsibilities, inflate partial matches, detach numbers from evidence, or hide genuine gaps. A purely lexical matcher has the opposite problem: it can miss transferable experience when the JD and profile use different wording.
 
-This project asks:
-
-> **How can an agent improve role relevance while preserving claim-level provenance and refusing unsupported claims?**
+> **How can an agent improve semantic recall while preserving claim-level provenance and refusing unsupported claims?**
 
 ## Agent workflow
 
@@ -43,9 +41,27 @@ The retrieval layer is replaceable; the evidence contract and final authorizatio
 | --- | --- | --- |
 | `lexical` | Transparent token/synonym baseline | Core package only |
 | `embedding` | Semantic similarity for paraphrases and transferable experience | Optional Sentence Transformers |
-| `hybrid` | Combines lexical evidence with semantic similarity | Optional Sentence Transformers |
+| `hybrid` | Weighted lexical + semantic retrieval | Optional Sentence Transformers |
 
 The default embedding adapter uses `sentence-transformers/all-MiniLM-L6-v2`. Retrieval outputs expose lexical, semantic, and combined scores so the evidence map remains inspectable.
+
+## Current retrieval benchmark
+
+A six-case fictional benchmark intentionally contains semantic paraphrases, lexical controls, and one unsupported commercial requirement.
+
+| Retriever | Top-1 accuracy | Recall@3 | Gap accuracy |
+| --- | ---: | ---: | ---: |
+| Lexical | 66.7% | 83.3% | 100% |
+| Embedding | **83.3%** | **100%** | **100%** |
+| Hybrid | **83.3%** | **100%** | **100%** |
+
+The most illustrative case is:
+
+> `Explain complex technical findings clearly to non-specialist audiences.`
+
+The lexical baseline returns `GAP`; embedding and hybrid retrieval correctly recover `claim_scientific_communication`. The real-model benchmark runs in GitHub Actions and publishes machine-readable artifacts. Aggregate values are committed in [`examples/retrieval_baseline_summary.json`](examples/retrieval_baseline_summary.json).
+
+These results measure retrieval behavior on a small fictional benchmark, **not hiring outcomes**.
 
 ## Core design decisions
 
@@ -87,15 +103,9 @@ outputs/demo/
 
 ## Semantic / hybrid retrieval
 
-Install the optional embedding dependency:
-
 ```bash
 pip install -e ".[dev,embedding]"
-```
 
-Run hybrid retrieval:
-
-```bash
 resume-agent run \
   --profile examples/fictional_profile.yaml \
   --jd examples/fictional_jd.md \
@@ -103,21 +113,9 @@ resume-agent run \
   --retriever hybrid
 ```
 
-Or pure embedding retrieval:
-
-```bash
-resume-agent run \
-  --profile examples/fictional_profile.yaml \
-  --jd examples/fictional_jd.md \
-  --output outputs/embedding_demo \
-  --retriever embedding
-```
-
-A custom Sentence Transformers model can be supplied with `--embedding-model`.
+Use `--retriever embedding` for pure embedding retrieval. A custom Sentence Transformers model can be supplied with `--embedding-model`.
 
 ## Retrieval benchmark
-
-v0.2 adds a fictional labeled benchmark with semantic paraphrases, lexical controls, and an explicit unsupported requirement.
 
 ```bash
 resume-agent benchmark-retrieval \
@@ -127,14 +125,9 @@ resume-agent benchmark-retrieval \
   --output outputs/lexical_benchmark.json
 ```
 
-After installing the embedding extra, rerun with `--retriever embedding` or `--retriever hybrid` and compare:
+After installing the embedding extra, rerun with `--retriever embedding` or `--retriever hybrid`. The report includes top-1 accuracy, recall@3, explicit-gap accuracy, selected claim IDs, match level, and retrieval scores.
 
-- top-1 accuracy;
-- recall@3;
-- explicit-gap accuracy;
-- per-case selected claim IDs and retrieval scores.
-
-This separates **semantic relevance evaluation** from the existing **factual safety evaluation**.
+This deliberately separates **semantic relevance evaluation** from **factual safety evaluation**.
 
 ## Guardrail evaluation
 
@@ -144,10 +137,11 @@ resume-agent evaluate \
   --output outputs/evaluation.json
 ```
 
-Committed baseline on the fictional fixture:
+Current baselines:
 
-- **7/7 synthetic guardrail cases passed**;
-- missing or unknown sources are blocked;
+- **10 automated tests pass** in lightweight CI;
+- **7/7 synthetic factual-safety cases pass**;
+- missing/unknown sources are blocked;
 - unverified and hidden claims are blocked;
 - forbidden wording is blocked;
 - untraceable numbers are blocked;
@@ -180,7 +174,7 @@ pip install -e ".[ui,embedding]"
 streamlit run app.py
 ```
 
-The UI exposes retriever selection, top retrieval scores, requirement-to-evidence mapping, tailored output, and the final audit.
+The UI exposes retriever selection, retrieval scores, requirement-to-evidence mapping, tailored output, and the final audit.
 
 ## Repository structure
 
@@ -189,7 +183,7 @@ Evidence-grounded_Resume_Tailoring_Agent/
 ├── src/evidence_grounded_resume_agent/
 │   ├── agent.py                  # controller + audit/revision loop
 │   ├── retrieval.py              # lexical / embedding / hybrid retrieval
-│   ├── retrieval_evaluation.py   # labeled semantic retrieval benchmark
+│   ├── retrieval_evaluation.py   # labeled retrieval benchmark
 │   ├── tools.py                  # JD parsing, planning, drafting
 │   ├── guardrails.py             # deterministic factual authorization
 │   ├── profile.py                # structured evidence model
@@ -200,36 +194,39 @@ Evidence-grounded_Resume_Tailoring_Agent/
 │   ├── fictional_profile.yaml
 │   ├── fictional_jd.md
 │   ├── retrieval_benchmark.yaml
+│   ├── retrieval_baseline_summary.json
 │   └── generated_demo/
 ├── tests/
 ├── docs/
 ├── app.py
-└── .github/workflows/ci.yml
+└── .github/workflows/
+    ├── ci.yml
+    └── semantic-benchmark.yml
 ```
 
 ## CARR summary
 
 ### Context
 
-Resume tailoring with generative AI creates a trust problem: stronger role-specific wording is useful, but lexical matching misses paraphrases while unconstrained generation can fabricate relevance.
+Resume tailoring has two competing risks: unconstrained generation can fabricate relevance, while lexical matching can miss semantically equivalent experience.
 
 ### Action
 
-I separated semantic retrieval from factual authorization. v0.2 introduces pluggable lexical, embedding, and hybrid retrievers with inspectable similarity scores, while verified-source filtering, provenance, metric ownership, forbidden-claim rules, and the final audit remain deterministic.
+I separated semantic retrieval from factual authorization. v0.2 introduces lexical, embedding, and hybrid retrievers with inspectable scores, while verified-source filtering, provenance, metric ownership, forbidden-claim rules, and final audit remain deterministic.
 
 ### Results
 
-The project now supports both lightweight offline execution and optional semantic retrieval, provides a labeled retrieval benchmark, records candidate-level retrieval scores, preserves explicit gaps, and retains the original guardrail/revision evaluation and CI.
+On the six-case fictional benchmark, embedding/hybrid retrieval improved Top-1 accuracy from **66.7% to 83.3%** and Recall@3 from **83.3% to 100%**, while preserving **100% explicit-gap accuracy**. Lightweight CI passes 10 automated tests, and the factual-safety suite remains 7/7.
 
 ### Reflection
 
-Embedding similarity improves recall but does not establish factual equivalence. The next useful iteration is not to weaken thresholds; it is to benchmark retrieval on more labeled examples, calibrate thresholds, and optionally add an LLM reranker that can explain semantic equivalence while remaining downstream of the same evidence contract.
+Embedding similarity improves recall but does not prove factual equivalence. The next useful iteration is a larger labeled benchmark, threshold calibration, and an optional LLM reranker that can explain semantic equivalence while remaining downstream of the same evidence contract.
 
 Full case study: [`docs/CARR.md`](docs/CARR.md).
 
 ## Limitations
 
-This is a portfolio-grade prototype, not a production recruiting platform. Embedding similarity is not proof that two experiences are equivalent. The public benchmark is small and fictional. The system does not rank candidates, infer protected attributes, or claim improvements in offer rate, ATS score, or commercial outcomes.
+This is a portfolio-grade prototype, not a production recruiting platform. The public benchmark is small and fictional. Embedding similarity is not proof that two experiences are equivalent. The system does not rank candidates, infer protected attributes, or claim improvements in offer rate, ATS score, or commercial outcomes.
 
 ## Roadmap
 
@@ -237,9 +234,9 @@ This is a portfolio-grade prototype, not a production recruiting platform. Embed
 - [x] Optional Sentence Transformers adapter.
 - [x] Inspectable candidate retrieval scores.
 - [x] Labeled requirement-to-claim benchmark command.
-- [ ] Run and publish a larger semantic benchmark with a real embedding model.
+- [x] Real embedding/hybrid integration benchmark in GitHub Actions.
+- [ ] Expand the semantic benchmark and calibrate retrieval thresholds.
 - [ ] Add optional LLM reranking/explanation behind the same evidence contract.
-- [ ] Add calibrated relevance thresholds and retrieval error analysis.
 - [ ] Add controlled paraphrasing that preserves source claim IDs.
 
 ## License
