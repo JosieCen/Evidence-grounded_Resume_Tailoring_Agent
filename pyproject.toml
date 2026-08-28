@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "evidence-grounded-resume-tailoring-agent"
-version = "0.1.0"
-description = "A privacy-safe showcase agent for evidence-grounded resume tailoring with provenance, guardrails, and evaluation."
+version = "0.2.0"
+description = "A privacy-safe showcase agent for evidence-grounded resume tailoring with provenance, semantic retrieval, guardrails, and evaluation."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
@@ -15,6 +15,7 @@ dependencies = ["PyYAML>=6.0,<7"]
 [project.optional-dependencies]
 dev = ["pytest>=8.0,<10"]
 ui = ["streamlit>=1.40,<2"]
+embedding = ["sentence-transformers>=6.0,<7"]
 
 [project.scripts]
 resume-agent = "evidence_grounded_resume_agent.cli:main"

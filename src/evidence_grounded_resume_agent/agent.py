@@ -10,19 +10,38 @@ from .io_utils import load_yaml, write_json, write_text, write_yaml
 from .models import AgentState, DraftBullet
 from .profile import claim_index, entity_by_claim, parse_entities
 from .render import render_analysis, render_resume_markdown
-from .tools import compose_bullets, eligible_claims, match_requirements, parse_jd, select_claims
+from .retrieval import (
+    DEFAULT_EMBEDDING_MODEL,
+    RetrievalConfig,
+    SentenceTransformerEmbedder,
+    TextEmbedder,
+    match_requirements,
+)
+from .tools import compose_bullets, eligible_claims, parse_jd, select_claims
 
 
 class ResumeTailoringAgent:
     """A small tool-using agent with deterministic safety gates.
 
-    The controller owns the loop. Tools perform parsing, retrieval, drafting and
-    validation. If the validation tool finds a violation, the controller revises
-    by removing invalid bullets and re-runs the audit before finalizing.
+    Semantic retrieval proposes candidate evidence. Deterministic authorization
+    still decides whether a claim is eligible to appear in the final output.
     """
 
-    def __init__(self, max_revisions: int = 2) -> None:
+    def __init__(
+        self,
+        max_revisions: int = 2,
+        *,
+        retriever_mode: str = "lexical",
+        embedding_model: str = DEFAULT_EMBEDDING_MODEL,
+        embedder: TextEmbedder | None = None,
+    ) -> None:
         self.max_revisions = max_revisions
+        self.retrieval_config = RetrievalConfig(mode=retriever_mode)
+        self.embedding_model = embedding_model
+        if retriever_mode in {"embedding", "hybrid"}:
+            self.embedder = embedder or SentenceTransformerEmbedder(embedding_model)
+        else:
+            self.embedder = None
 
     @staticmethod
     def _trace(state: AgentState, action: str, detail: dict[str, Any]) -> None:
@@ -56,11 +75,18 @@ class ResumeTailoringAgent:
             raise ValueError("No job requirements could be parsed from the JD.")
 
         state.step = "retrieve_evidence"
-        state.matches = match_requirements(state.requirements, safe_claims)
+        state.matches = match_requirements(
+            state.requirements,
+            safe_claims,
+            config=self.retrieval_config,
+            embedder=self.embedder,
+        )
         self._trace(
             state,
             "retrieve_evidence",
             {
+                "retrieval_mode": self.retrieval_config.mode,
+                "embedding_model": self.embedding_model if self.embedder is not None else None,
                 "eligible_claims": len(safe_claims),
                 "strong": sum(item.match_level == "STRONG_MATCH" for item in state.matches),
                 "partial": sum(item.match_level == "PARTIAL_MATCH" for item in state.matches),
@@ -121,6 +147,8 @@ class ResumeTailoringAgent:
         audit = {
             "status": status,
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            "retrieval_mode": self.retrieval_config.mode,
+            "embedding_model": self.embedding_model if self.embedder is not None else None,
             "selected_claim_count": len(state.selected_claim_ids),
             "final_bullet_count": len(state.bullets),
             "revision_count": state.revision_count,

@@ -21,13 +21,17 @@ def render_resume_markdown(
 
 def render_analysis(matches: list[Match]) -> dict:
     return {
+        "retrieval_mode": matches[0].retrieval_mode if matches else "unknown",
         "requirements": [
             {
                 "id": match.requirement_id,
                 "text": match.requirement_text,
                 "match_level": match.match_level,
+                "retrieval_mode": match.retrieval_mode,
+                "top_score": match.top_score,
                 "source_claim_ids": match.source_claim_ids,
                 "overlap_tokens": match.overlap_tokens,
+                "candidate_scores": match.candidate_scores,
             }
             for match in matches
         ],

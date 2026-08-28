@@ -7,26 +7,41 @@ The main architectural choice is to separate **semantic relevance** from **factu
 ```mermaid
 flowchart TD
     JD[Job description] --> P[Parse requirements]
-    DB[Verified claim store] --> R[Evidence retrieval]
+    DB[Verified claim store] --> R[Retrieval layer]
     P --> R
-    R --> PL[Claim planner]
+    R --> L[Lexical retriever]
+    R --> E[Embedding retriever]
+    L --> H[Hybrid score]
+    E --> H
+    H --> PL[Claim planner]
     PL --> D[Draft tool]
-    D --> A[Audit tool]
+    D --> A[Deterministic audit]
     A -->|No violations| F[Finalize]
     A -->|Violations| RV[Revise]
     RV --> A
 ```
 
-### Reasoning/relevance layer
+## Retrieval layer
 
-- parses a JD into atomic requirements;
-- finds evidence that may support each requirement;
-- labels the result as `STRONG_MATCH`, `PARTIAL_MATCH`, or `GAP`;
-- chooses a small set of claims for the tailored output.
+v0.2 provides three interchangeable modes:
 
-The current implementation uses transparent token/synonym matching so it can run offline and remain inspectable.
+- `lexical`: token/synonym overlap; transparent and dependency-light;
+- `embedding`: cosine similarity over Sentence Transformers embeddings;
+- `hybrid`: weighted lexical + semantic score.
 
-### Evidence contract
+Every selected candidate records:
+
+- claim ID;
+- lexical score;
+- semantic score;
+- combined score;
+- lexical overlap tokens.
+
+This keeps semantic retrieval inspectable instead of returning an unexplained match.
+
+The default embedding adapter is `sentence-transformers/all-MiniLM-L6-v2`, but the adapter implements a small `TextEmbedder` contract so another embedding provider can be substituted later.
+
+## Evidence contract
 
 A claim carries:
 
@@ -39,11 +54,13 @@ A claim carries:
 - optional metric IDs and values;
 - semantic tags.
 
-The draft is not itself a fact source.
+Only claims that are verified, visible, and backed by evidence are offered to the retrieval layer. The draft is never treated as a new fact source.
 
-### Guardrail layer
+## Why semantic similarity does not authorize a claim
 
-The audit checks:
+Embedding similarity can recover paraphrases and transferable experience, but a high cosine score does not prove that two responsibilities are factually equivalent. The system therefore treats retrieval as **candidate generation**, not authorization.
+
+The deterministic audit still checks:
 
 - missing source IDs;
 - unknown source IDs;
@@ -54,18 +71,28 @@ The audit checks:
 - numbers without a source-owned metric;
 - duplicate bullets.
 
-If a draft bullet fails, the agent removes that bullet and re-runs the audit before finalization.
+If a draft bullet fails, the agent removes it and re-runs the audit before finalization.
 
-## Why not let the LLM self-check?
+## Hybrid scoring
 
-A model can be useful for semantic matching and rewriting, but asking the same probabilistic model to both create and authorize a factual claim collapses two different responsibilities. This project therefore keeps factual authorization deterministic and inspectable.
+The default hybrid configuration combines:
+
+```text
+combined_score = 0.35 * lexical_score + 0.65 * semantic_score
+```
+
+The weights and thresholds are explicit configuration rather than hidden prompt behavior. They are intentionally provisional and should be calibrated against the labeled retrieval benchmark rather than assumed to be universally optimal.
 
 ## Replaceable reasoning layer
 
-A future LLM or embedding retriever should implement the same input/output contract:
+Future LLM reranking can sit after retrieval:
 
 ```text
-Requirement -> ranked claim IDs + match level + rationale
+Requirement
+  -> lexical/embedding candidate retrieval
+  -> optional LLM rerank + rationale
+  -> claim planner
+  -> deterministic factual authorization
 ```
 
-That lets semantic quality improve without weakening provenance and guardrail rules.
+The LLM would be allowed to improve ordering and explain semantic equivalence, but it would not be allowed to create evidence or bypass claim-level provenance.

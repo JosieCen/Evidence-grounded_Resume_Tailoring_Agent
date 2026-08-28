@@ -1,0 +1,36 @@
+meta:
+  version: 0.2.0
+  privacy: entirely_fictional
+  purpose: labeled requirement-to-claim retrieval benchmark
+cases:
+  - id: semantic_communication
+    requirement: Explain complex technical findings clearly to non-specialist audiences.
+    expected_claim_ids:
+      - claim_scientific_communication
+
+  - id: semantic_product_translation
+    requirement: Turn clinician pain points into concrete, testable feature specifications.
+    expected_claim_ids:
+      - claim_workflow_eval
+      - claim_mvp_mapping
+
+  - id: semantic_llm_safety
+    requirement: Inspect model-generated clinical content for unsupported or misleading statements.
+    expected_claim_ids:
+      - claim_llm_review_120
+
+  - id: semantic_traceability
+    requirement: Build an auditable automation flow that preserves the origin of generated application content.
+    expected_claim_ids:
+      - claim_python_pipeline
+
+  - id: lexical_overlap_control
+    requirement: Define product requirements and model evaluation plans for a healthcare AI workflow.
+    expected_claim_ids:
+      - claim_workflow_eval
+      - claim_mvp_mapping
+
+  - id: explicit_gap_control
+    requirement: Own enterprise sales revenue targets and negotiate commercial contracts.
+    expect_gap: true
+    expected_claim_ids: []

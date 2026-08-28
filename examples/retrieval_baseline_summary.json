@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "benchmark": "examples/retrieval_benchmark.yaml",
+  "cases": 6,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "results": {
+    "lexical": {
+      "top1_accuracy": 0.6666666667,
+      "recall_at_3": 0.8333333333,
+      "gap_accuracy": 1.0
+    },
+    "embedding": {
+      "top1_accuracy": 0.8333333333,
+      "recall_at_3": 1.0,
+      "gap_accuracy": 1.0
+    },
+    "hybrid": {
+      "top1_accuracy": 0.8333333333,
+      "recall_at_3": 1.0,
+      "gap_accuracy": 1.0
+    }
+  },
+  "notable_case": {
+    "id": "semantic_communication",
+    "requirement": "Explain complex technical findings clearly to non-specialist audiences.",
+    "lexical": "GAP",
+    "embedding": {
+      "match_level": "PARTIAL_MATCH",
+      "top_claim_id": "claim_scientific_communication",
+      "top_score": 0.3414
+    },
+    "hybrid": {
+      "match_level": "PARTIAL_MATCH",
+      "top_claim_id": "claim_scientific_communication",
+      "top_score": 0.2219
+    }
+  },
+  "note": "All data and benchmark cases are fictional. These values measure retrieval behavior on a small portfolio benchmark, not hiring outcomes."
+}

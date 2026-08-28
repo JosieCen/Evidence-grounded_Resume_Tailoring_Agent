@@ -2,60 +2,76 @@
 
 ## C — Context
 
-When tailoring a resume to different job descriptions, generative AI creates a tension between **relevance** and **truthfulness**. A model can quickly rewrite content into role-specific language, but free-form generation can also introduce responsibilities the candidate never performed, turn partial overlap into an apparent match, or detach metrics from their original evidence.
+Resume tailoring with generative AI creates two different failure modes.
 
-The product problem was therefore not simply "generate a better resume." It was:
+First, unconstrained generation can make a candidate sound more relevant by inventing responsibilities, inflating partial matches, or detaching metrics from their original evidence. Second, a purely lexical matcher can be too conservative: transferable experience and semantically equivalent wording may be missed when the JD and profile use different vocabulary.
 
-> How can an agent optimize role relevance while maintaining a single factual source of truth and making unsupported requirements visible instead of hallucinating around them?
+The product problem therefore became:
+
+> How can an agent increase semantic recall while preserving a single factual source of truth and keeping unsupported requirements visible?
 
 ## A — Action
 
-I designed the system around a structured evidence model rather than free-form source text.
+I designed the system so **retrieval and authorization are separate responsibilities**.
 
-Each career claim receives a stable ID, evidence references, verification/visibility status, optional blocked wording, semantic tags and metric metadata. The agent then runs a multi-step workflow:
+Each career claim has a stable ID, evidence references, verification/visibility state, optional blocked wording, semantic tags, and metric metadata. The agent then runs:
 
 1. parse the JD into requirements;
-2. retrieve verified claims relevant to each requirement;
-3. classify requirements as strong match, partial match or gap;
-4. plan a compact evidence set;
-5. draft tailored content using only authorized claims;
-6. run deterministic guardrail checks;
-7. revise and re-audit when a violation is detected;
-8. emit the resume plus an evidence map, audit report and run trace.
+2. retrieve only evidence-eligible claims;
+3. rank candidates with lexical, embedding, or hybrid retrieval;
+4. expose lexical/semantic/combined retrieval scores;
+5. classify each requirement as strong match, partial match, or gap;
+6. plan a compact evidence set;
+7. draft content using cited claims;
+8. run deterministic factual guardrails;
+9. revise and re-audit unsafe bullets;
+10. emit the resume, evidence map, audit report, and run trace.
 
-I deliberately kept factual authorization outside the generative/reasoning layer. This makes it possible to replace the current local matcher with an LLM or embedding retriever later without changing the core safety contract.
+For v0.2, I added a minimal `TextEmbedder` interface and an optional Sentence Transformers adapter using `all-MiniLM-L6-v2`. The hybrid retriever currently combines 35% lexical and 65% semantic score. These weights and thresholds are explicit and benchmarkable rather than hidden inside a prompt.
+
+I deliberately did **not** let semantic similarity bypass verification, visibility, provenance, blocked wording, or metric ownership rules.
 
 ## R — Results
 
-The v0.1 showcase now includes:
+The v0.2 showcase now includes:
 
-- runnable CLI;
-- optional Streamlit prototype;
-- structured fictional profile and JD fixtures;
-- requirement-to-evidence mapping;
-- explicit gap handling;
-- claim-level provenance;
-- deterministic guardrails;
-- automatic audit/revision loop;
-- machine-readable audit and run trace;
-- GitHub Actions CI;
-- 7 automated tests passing;
-- 7/7 synthetic guardrail cases passing.
+- runnable CLI and Streamlit UI;
+- `lexical`, `embedding`, and `hybrid` retriever modes;
+- optional Sentence Transformers integration;
+- candidate-level lexical, semantic, and combined scores;
+- a six-case labeled fictional retrieval benchmark;
+- deterministic semantic-retrieval tests plus real-model integration CI;
+- claim-level provenance and explicit gaps;
+- deterministic guardrails and automatic audit/revision;
+- machine-readable audit, run trace, benchmark reports, and GitHub Actions artifacts.
 
-In the baseline E2E demo, the agent selected 5 verified claims, produced 5 traceable bullets, preserved 1 intentionally unsupported JD requirement as a gap, and returned 0 final violations. In an adversarial demo, an injected unsupported "production deployment + 42% revenue" bullet was detected and removed in one revision cycle before finalization.
+On the six-case benchmark:
 
-These are engineering/evaluation results rather than business KPIs; the project makes no claim about offer rate or recruiter conversion because it has not been deployed in a real hiring experiment.
+| Retriever | Top-1 | Recall@3 | Gap accuracy |
+| --- | ---: | ---: | ---: |
+| Lexical | 66.7% | 83.3% | 100% |
+| Embedding | **83.3%** | **100%** | **100%** |
+| Hybrid | **83.3%** | **100%** | **100%** |
+
+The semantic communication paraphrase was a lexical `GAP` but was correctly recovered by embedding and hybrid retrieval. At the same time, the intentionally unsupported enterprise sales/revenue case remained a `GAP` in all modes.
+
+The factual-safety layer also remained unchanged: **7/7 synthetic safety cases pass**, and the lightweight CI currently passes **10 automated tests**.
+
+These are engineering and retrieval-evaluation results, not hiring KPIs. The project does not claim improved interview rate, offer rate, ATS score, or recruiter conversion.
 
 ## R — Reflection
 
-The strongest aspect of v0.1 is not semantic matching quality; it is the separation between relevance generation and factual authorization. The current token/synonym retriever is intentionally interpretable but too simple for nuanced real-world JD semantics.
+v0.2 demonstrates that semantic retrieval can improve recall without weakening factual safety, but the benchmark also reveals an important remaining error: both embedding and hybrid retrieval rank `claim_workflow_eval` above the expected `claim_llm_review_120` for one LLM-safety paraphrase. The expected evidence is still retrieved within Top-3, which is why Recall@3 reaches 100% while Top-1 remains 83.3%.
 
-The next iteration should therefore focus on **semantic quality without weakening factual safety**:
+The next iteration should therefore focus on **calibration and reranking**, not on claiming perfect retrieval:
 
-1. introduce an LLM/embedding retriever behind the same claim-selection interface;
-2. create a larger labeled synthetic benchmark for requirement-to-claim matching;
-3. add controlled paraphrasing while preserving claim IDs and metric provenance;
-4. compare relevance/readability improvements against unsupported-claim rate;
-5. add human review controls for partial matches and style preferences.
+1. expand the labeled benchmark;
+2. inspect false-positive semantic matches by error category;
+3. calibrate hybrid weights and strong/partial/gap thresholds;
+4. add an optional LLM reranker that can explain semantic equivalence but cannot create evidence;
+5. add controlled paraphrasing while preserving source claim IDs and metrics;
+6. include human review for ambiguous partial matches.
 
-The key product principle for iteration is: **better tailoring is only better if provenance remains intact.**
+The product principle remains:
+
+> **Better tailoring is only better if provenance remains intact.**

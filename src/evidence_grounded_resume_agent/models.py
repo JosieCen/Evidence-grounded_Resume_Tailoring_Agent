@@ -39,6 +39,9 @@ class Match:
     match_level: str
     source_claim_ids: list[str] = field(default_factory=list)
     overlap_tokens: list[str] = field(default_factory=list)
+    retrieval_mode: str = "lexical"
+    top_score: float = 0.0
+    candidate_scores: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
