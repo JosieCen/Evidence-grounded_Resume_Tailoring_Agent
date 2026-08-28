@@ -1,0 +1,70 @@
+{
+  "status": "passed",
+  "generated_at": "2026-08-28T10:01:36.370014+00:00",
+  "selected_claim_count": 5,
+  "final_bullet_count": 5,
+  "revision_count": 0,
+  "violations": [],
+  "traceability": [
+    {
+      "text": "Defined model evaluation plans around clinical workflows and translated medical needs into testable product requirements.",
+      "source_claim_ids": [
+        "claim_workflow_eval"
+      ],
+      "requirement_ids": [
+        "req_01",
+        "req_02",
+        "req_03",
+        "req_04"
+      ],
+      "metric_ids": []
+    },
+    {
+      "text": "Mapped a clinician user journey and defined an MVP requirement set for a simulated healthcare AI evaluation workflow.",
+      "source_claim_ids": [
+        "claim_mvp_mapping"
+      ],
+      "requirement_ids": [
+        "req_01",
+        "req_02",
+        "req_04"
+      ],
+      "metric_ids": []
+    },
+    {
+      "text": "Reviewed 120 fictional medical-record responses from a language model for factual accuracy and hallucination risk.",
+      "source_claim_ids": [
+        "claim_llm_review_120"
+      ],
+      "requirement_ids": [
+        "req_01",
+        "req_02"
+      ],
+      "metric_ids": [
+        "metric_records_120"
+      ]
+    },
+    {
+      "text": "Built a Python workflow that converts structured evidence into traceable application-ready content and audit artifacts.",
+      "source_claim_ids": [
+        "claim_python_pipeline"
+      ],
+      "requirement_ids": [
+        "req_03"
+      ],
+      "metric_ids": []
+    },
+    {
+      "text": "Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.",
+      "source_claim_ids": [
+        "claim_scientific_communication"
+      ],
+      "requirement_ids": [
+        "req_03",
+        "req_04"
+      ],
+      "metric_ids": []
+    }
+  ],
+  "gap_count": 1
+}

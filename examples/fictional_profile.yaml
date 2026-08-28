@@ -1,0 +1,78 @@
+meta:
+  schema_version: 1.0.0
+  privacy: entirely_fictional
+candidate:
+  name: An Lin
+  location: Shanghai, China
+target_role_label: Medical AI Product Associate
+entities:
+  - id: exp_medical_ai_lab
+    title: Medical AI Evaluation Research Assistant
+    organization: Example Clinical AI Laboratory
+    category: experience
+    claims:
+      - id: claim_workflow_eval
+        text: Defined model evaluation plans around clinical workflows and translated medical needs into testable product requirements.
+        status: verified
+        visible: true
+        evidence_refs: [protocol_v1, evaluation_plan]
+        tags: [clinical, evaluation, product, requirement, workflow]
+        do_not_claim: [production deployment]
+      - id: claim_llm_review_120
+        text: Reviewed 120 fictional medical-record responses from a language model for factual accuracy and hallucination risk.
+        status: verified
+        visible: true
+        evidence_refs: [evaluation_table]
+        tags: [llm, evaluation, hallucination, clinical safety]
+        metrics:
+          - id: metric_records_120
+            value: 120
+            unit: responses
+        do_not_claim: [commercial impact]
+      - id: claim_unverified_revenue
+        text: Improved commercial conversion through AI-assisted workflow optimization.
+        status: unverified
+        visible: true
+        evidence_refs: [draft_note]
+        tags: [business, product]
+        do_not_claim: []
+
+  - id: project_requirement_mapper
+    title: Clinical Requirement Mapping Prototype
+    organization: Example Course Project
+    category: project
+    claims:
+      - id: claim_mvp_mapping
+        text: Mapped a clinician user journey and defined an MVP requirement set for a simulated healthcare AI evaluation workflow.
+        status: verified
+        visible: true
+        evidence_refs: [course_report]
+        tags: [user journey, mvp, healthcare, ai, product]
+        do_not_claim: [shipped product]
+      - id: claim_python_pipeline
+        text: Built a Python workflow that converts structured evidence into traceable application-ready content and audit artifacts.
+        status: verified
+        visible: true
+        evidence_refs: [repository_commit, test_report]
+        tags: [python, automation, pipeline, evidence, provenance]
+        do_not_claim: [enterprise deployment]
+
+  - id: exp_scientific_communication
+    title: Biomedical Research Trainee
+    organization: Example Medical University
+    category: experience
+    claims:
+      - id: claim_scientific_communication
+        text: Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.
+        status: verified
+        visible: true
+        evidence_refs: [presentation_archive]
+        tags: [communication, evidence, literature, presentation]
+        do_not_claim: [KOL management]
+      - id: claim_private_draft
+        text: Drafted an internal experimental concept that is not approved for external use.
+        status: verified
+        visible: false
+        evidence_refs: [private_note]
+        tags: [research]
+        do_not_claim: []

@@ -1,0 +1,46 @@
+[
+  {
+    "step": 1,
+    "action": "parse_jd",
+    "detail": {
+      "requirements": 5
+    }
+  },
+  {
+    "step": 2,
+    "action": "retrieve_evidence",
+    "detail": {
+      "eligible_claims": 5,
+      "strong": 4,
+      "partial": 0,
+      "gaps": 1
+    }
+  },
+  {
+    "step": 3,
+    "action": "plan_claims",
+    "detail": {
+      "selected_claim_ids": [
+        "claim_workflow_eval",
+        "claim_mvp_mapping",
+        "claim_llm_review_120",
+        "claim_python_pipeline",
+        "claim_scientific_communication"
+      ]
+    }
+  },
+  {
+    "step": 4,
+    "action": "draft",
+    "detail": {
+      "draft_bullets": 5
+    }
+  },
+  {
+    "step": 5,
+    "action": "audit",
+    "detail": {
+      "violations": []
+    }
+  }
+]

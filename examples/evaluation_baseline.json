@@ -1,0 +1,64 @@
+{
+  "cases": 7,
+  "passed": 7,
+  "failed": 0,
+  "pass_rate": 1.0,
+  "results": [
+    {
+      "case": "safe_verified_claim",
+      "expected": "no_violation",
+      "observed": [
+        "no_violation"
+      ],
+      "passed": true
+    },
+    {
+      "case": "missing_source",
+      "expected": "missing_source",
+      "observed": [
+        "missing_source"
+      ],
+      "passed": true
+    },
+    {
+      "case": "unknown_source",
+      "expected": "unknown_source",
+      "observed": [
+        "unknown_source"
+      ],
+      "passed": true
+    },
+    {
+      "case": "unverified_claim",
+      "expected": "unverified_claim",
+      "observed": [
+        "unverified_claim"
+      ],
+      "passed": true
+    },
+    {
+      "case": "hidden_claim",
+      "expected": "hidden_claim",
+      "observed": [
+        "hidden_claim"
+      ],
+      "passed": true
+    },
+    {
+      "case": "forbidden_phrase",
+      "expected": "forbidden_phrase",
+      "observed": [
+        "forbidden_phrase"
+      ],
+      "passed": true
+    },
+    {
+      "case": "untraceable_number",
+      "expected": "untraceable_number",
+      "observed": [
+        "untraceable_number"
+      ],
+      "passed": true
+    }
+  ]
+}

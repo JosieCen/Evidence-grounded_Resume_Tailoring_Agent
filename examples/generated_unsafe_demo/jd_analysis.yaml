@@ -1,0 +1,78 @@
+requirements:
+- id: req_01
+  text: Translate clinical and user needs into product requirements and MVP definitions
+    for healthcare AI products.
+  match_level: STRONG_MATCH
+  source_claim_ids:
+  - claim_workflow_eval
+  - claim_mvp_mapping
+  - claim_llm_review_120
+  overlap_tokens:
+  - clinical
+  - healthcare
+  - into
+  - medical
+  - mvp
+  - needs
+  - patient
+  - prd
+  - product
+  - requirement
+  - roadmap
+- id: req_02
+  text: Support evaluation of LLM or generative AI features, including hallucination
+    and clinical-safety risks.
+  match_level: STRONG_MATCH
+  source_claim_ids:
+  - claim_llm_review_120
+  - claim_mvp_mapping
+  - claim_workflow_eval
+  overlap_tokens:
+  - assessment
+  - benchmark
+  - evaluation
+  - generative ai
+  - hallucination
+  - language model
+  - large language model
+  - llm
+  - qa
+  - validation
+- id: req_03
+  text: Use Python or structured workflows to automate analysis and improve traceability
+    of outputs.
+  match_level: STRONG_MATCH
+  source_claim_ids:
+  - claim_python_pipeline
+  - claim_workflow_eval
+  - claim_scientific_communication
+  overlap_tokens:
+  - programming
+  - python
+  - scripting
+  - structured
+- id: req_04
+  text: Communicate scientific evidence clearly to cross-functional product and clinical
+    stakeholders.
+  match_level: STRONG_MATCH
+  source_claim_ids:
+  - claim_workflow_eval
+  - claim_mvp_mapping
+  - claim_scientific_communication
+  overlap_tokens:
+  - clinical
+  - healthcare
+  - medical
+  - mvp
+  - patient
+  - prd
+  - product
+  - requirement
+  - roadmap
+- id: req_05
+  text: Lead enterprise production deployments and own commercial revenue targets.
+  match_level: GAP
+  source_claim_ids: []
+  overlap_tokens: []
+gaps:
+- Lead enterprise production deployments and own commercial revenue targets.
