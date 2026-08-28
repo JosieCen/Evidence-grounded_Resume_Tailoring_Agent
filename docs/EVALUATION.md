@@ -2,9 +2,9 @@
 
 The project evaluates **factual safety** separately from **semantic relevance**.
 
-## 1. Guardrail evaluation
+## 1. Factual-safety evaluation
 
-The committed fictional fixture is used to generate synthetic adversarial cases.
+The committed fictional fixture generates synthetic adversarial cases.
 
 | Case | Expected behavior | Baseline |
 | --- | --- | --- |
@@ -16,67 +16,80 @@ The committed fictional fixture is used to generate synthetic adversarial cases.
 | Forbidden wording | Block | Pass |
 | Untraceable number | Block | Pass |
 
-**Baseline: 7/7 passed (100%).**
+**Committed baseline: 7/7 passed (100%).**
 
 The machine-readable result is committed at `examples/evaluation_baseline.json`.
 
-## 2. End-to-end behavior
+## 2. End-to-end safety behavior
 
-The fictional JD intentionally includes one unsupported requirement:
+The fictional JD intentionally includes one unsupported requirement related to enterprise deployment/revenue ownership. The baseline agent keeps it as a `GAP` instead of fabricating supporting evidence.
 
-> Lead enterprise production deployments and own commercial revenue targets.
+The adversarial `--simulate-unsafe-draft` path injects an unsupported production/revenue bullet. The deterministic audit removes it and re-audits before finalization.
 
-The demo profile does not contain authorized evidence for that responsibility. The agent therefore keeps it as a `GAP` rather than converting it into resume content.
+## 3. v0.2 semantic retrieval benchmark
 
-Normal E2E baseline:
+`examples/retrieval_benchmark.yaml` adds six labeled fictional cases:
 
-- selected verified claims: 5;
-- final bullets: 5;
-- explicit gaps: 1;
-- remaining violations: 0.
+- semantic communication paraphrase;
+- product/clinical requirement translation;
+- LLM safety review paraphrase;
+- provenance/automation paraphrase;
+- lexical-overlap control;
+- explicit unsupported gap control.
 
-## 3. Revision-loop test
+Run the lightweight lexical baseline:
 
-`--simulate-unsafe-draft` intentionally injects:
+```bash
+resume-agent benchmark-retrieval \
+  --profile examples/fictional_profile.yaml \
+  --benchmark examples/retrieval_benchmark.yaml \
+  --retriever lexical \
+  --output outputs/lexical_benchmark.json
+```
 
-> Led enterprise production deployment and increased revenue by 42%.
+With the optional embedding dependency installed, compare:
 
-with no source claim.
+```bash
+resume-agent benchmark-retrieval --retriever embedding --output outputs/embedding_benchmark.json
+resume-agent benchmark-retrieval --retriever hybrid --output outputs/hybrid_benchmark.json
+```
 
-Baseline behavior:
+The report contains:
 
-- audit detects the unsupported bullet;
-- revision count: 1;
-- unsafe bullet removed;
-- re-audit passes;
-- final remaining violations: 0.
+- top-1 accuracy;
+- recall@3;
+- explicit-gap accuracy;
+- per-case selected claim IDs;
+- observed match level;
+- top retrieval score.
 
-## 4. Automated test suite
+## 4. What CI tests in v0.2
 
-Current baseline: **7 tests passed**.
+CI deliberately does **not** download a large embedding model for every push. Instead, semantic retrieval logic is tested with a deterministic embedding test double.
 
-Tests cover:
+The tests verify that:
 
-- E2E traceability;
-- explicit gap preservation;
-- missing-source blocking;
-- unverified-claim blocking;
-- hidden-claim blocking;
-- untraceable-number blocking;
-- automatic agent revision;
-- synthetic evaluation-suite integrity.
+- lexical retrieval can remain a gap when wording has no token overlap;
+- embedding retrieval can recover the intended semantically equivalent claim;
+- hybrid retrieval can also recover the claim;
+- an unrelated commercial requirement remains a gap;
+- benchmark metrics are machine-readable;
+- all original guardrail and E2E behavior remains intact.
 
-## 5. Metrics planned for v0.2
+A real embedding model is an integration dependency, while retrieval ranking and safety behavior remain unit-testable without network access.
 
-Once an LLM/embedding retriever is introduced, semantic matching should be measured independently:
+## 5. Metrics for the next calibration cycle
 
-- requirement-level precision;
-- requirement-level recall;
+The larger benchmark should track:
+
+- requirement-level top-1 accuracy;
+- recall@K;
 - strong/partial/gap classification accuracy;
-- unsupported-claim rate after rewriting;
-- citation/claim traceability coverage;
+- false-positive semantic matches;
+- unsupported-claim rate after drafting;
+- claim traceability coverage;
 - metric traceability coverage;
 - revision rate;
 - human preference for relevance/readability.
 
-A better semantic model is only an improvement if unsupported-claim rate does not increase.
+A better retriever is only an improvement if semantic recall rises **without increasing unsupported-claim leakage**.
