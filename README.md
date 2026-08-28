@@ -55,11 +55,25 @@ A six-case fictional benchmark intentionally contains semantic paraphrases, lexi
 | Embedding | **83.3%** | **100%** | **100%** |
 | Hybrid | **83.3%** | **100%** | **100%** |
 
-The most illustrative case is:
+### Why semantic retrieval matters — one concrete case
 
-> `Explain complex technical findings clearly to non-specialist audiences.`
+**JD requirement**
 
-The lexical baseline returns `GAP`; embedding and hybrid retrieval correctly recover `claim_scientific_communication`. The real-model benchmark runs in GitHub Actions and publishes machine-readable artifacts. Aggregate values are committed in [`examples/retrieval_baseline_summary.json`](examples/retrieval_baseline_summary.json).
+> Explain complex technical findings clearly to non-specialist audiences.
+
+**Verified profile evidence**
+
+> Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.
+
+A human reader can see that both statements describe the same underlying capability: **turning complex scientific information into clear communication**. But they share very little wording.
+
+- **Lexical retrieval:** returns `GAP` because it mainly depends on token/synonym overlap.
+- **Embedding retrieval:** returns `PARTIAL_MATCH` and correctly retrieves `claim_scientific_communication` because the two sentences are close in semantic meaning even without shared keywords.
+- **Hybrid retrieval:** also retrieves `claim_scientific_communication` by combining lexical evidence with embedding similarity.
+
+This is the main value of v0.2: **recover transferable evidence that keyword matching can miss, while still requiring deterministic factual authorization before any claim can appear in the final resume.**
+
+The real-model benchmark runs in GitHub Actions and publishes machine-readable artifacts. Aggregate values are committed in [`examples/retrieval_baseline_summary.json`](examples/retrieval_baseline_summary.json).
 
 These results measure retrieval behavior on a small fictional benchmark, **not hiring outcomes**.
 
