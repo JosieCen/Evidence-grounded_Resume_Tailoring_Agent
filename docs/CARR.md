@@ -27,7 +27,7 @@ Each career claim has a stable ID, evidence references, verification/visibility 
 9. revise and re-audit unsafe bullets;
 10. emit the resume, evidence map, audit report, and run trace.
 
-For v0.2, I added a minimal `TextEmbedder` interface and an optional Sentence Transformers adapter. The default demo remains dependency-light, while users can opt into semantic or hybrid retrieval. The hybrid retriever currently weights semantic similarity more heavily than lexical overlap, but the weights and thresholds remain explicit and benchmarkable rather than hidden inside a prompt.
+For v0.2, I added a minimal `TextEmbedder` interface and an optional Sentence Transformers adapter using `all-MiniLM-L6-v2`. The hybrid retriever currently combines 35% lexical and 65% semantic score. These weights and thresholds are explicit and benchmarkable rather than hidden inside a prompt.
 
 I deliberately did **not** let semantic similarity bypass verification, visibility, provenance, blocked wording, or metric ownership rules.
 
@@ -39,31 +39,36 @@ The v0.2 showcase now includes:
 - `lexical`, `embedding`, and `hybrid` retriever modes;
 - optional Sentence Transformers integration;
 - candidate-level lexical, semantic, and combined scores;
-- structured fictional profile and JD fixtures;
-- a six-case labeled semantic retrieval benchmark;
-- requirement-to-evidence mapping and explicit gaps;
-- claim-level provenance;
-- deterministic guardrails;
-- automatic audit/revision loop;
-- machine-readable audit and run trace;
-- GitHub Actions CI;
-- deterministic tests showing semantic recovery without lexical overlap while preserving an unrelated gap;
-- the original 7/7 synthetic factual-safety baseline.
+- a six-case labeled fictional retrieval benchmark;
+- deterministic semantic-retrieval tests plus real-model integration CI;
+- claim-level provenance and explicit gaps;
+- deterministic guardrails and automatic audit/revision;
+- machine-readable audit, run trace, benchmark reports, and GitHub Actions artifacts.
 
-The existing E2E behavior remains intact: unsupported requirements stay gaps, and an injected unsupported production/revenue bullet is removed before finalization.
+On the six-case benchmark:
 
-These are engineering and evaluation results, not hiring KPIs. The project does not claim improved interview rate, offer rate, ATS score, or recruiter conversion.
+| Retriever | Top-1 | Recall@3 | Gap accuracy |
+| --- | ---: | ---: | ---: |
+| Lexical | 66.7% | 83.3% | 100% |
+| Embedding | **83.3%** | **100%** | **100%** |
+| Hybrid | **83.3%** | **100%** | **100%** |
+
+The semantic communication paraphrase was a lexical `GAP` but was correctly recovered by embedding and hybrid retrieval. At the same time, the intentionally unsupported enterprise sales/revenue case remained a `GAP` in all modes.
+
+The factual-safety layer also remained unchanged: **7/7 synthetic safety cases pass**, and the lightweight CI currently passes **10 automated tests**.
+
+These are engineering and retrieval-evaluation results, not hiring KPIs. The project does not claim improved interview rate, offer rate, ATS score, or recruiter conversion.
 
 ## R — Reflection
 
-v0.2 solves the architectural problem of introducing semantic retrieval without weakening factual safety, but it does not prove that the current embedding model or thresholds are optimal.
+v0.2 demonstrates that semantic retrieval can improve recall without weakening factual safety, but the benchmark also reveals an important remaining error: both embedding and hybrid retrieval rank `claim_workflow_eval` above the expected `claim_llm_review_120` for one LLM-safety paraphrase. The expected evidence is still retrieved within Top-3, which is why Recall@3 reaches 100% while Top-1 remains 83.3%.
 
-The next iteration should focus on **calibration and error analysis**:
+The next iteration should therefore focus on **calibration and reranking**, not on claiming perfect retrieval:
 
-1. run a larger labeled requirement-to-claim benchmark with a real embedding model;
-2. inspect false-positive semantic matches and missed transferable experience;
+1. expand the labeled benchmark;
+2. inspect false-positive semantic matches by error category;
 3. calibrate hybrid weights and strong/partial/gap thresholds;
-4. optionally add an LLM reranker that explains semantic equivalence but cannot create evidence;
+4. add an optional LLM reranker that can explain semantic equivalence but cannot create evidence;
 5. add controlled paraphrasing while preserving source claim IDs and metrics;
 6. include human review for ambiguous partial matches.
 
