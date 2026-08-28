@@ -47,6 +47,18 @@ resume-agent benchmark-retrieval \
   --output outputs/lexical_benchmark.json
 ```
 
+Current lexical baseline on the six-case fixture:
+
+- **Top-1 accuracy: 66.7%**;
+- **Recall@3: 83.3%**;
+- **Gap accuracy: 100%**.
+
+The most informative miss is the zero-overlap paraphrase:
+
+> Explain complex technical findings clearly to non-specialist audiences.
+
+The lexical baseline returns `GAP`, creating a concrete target for embedding/hybrid retrieval.
+
 With the optional embedding dependency installed, compare:
 
 ```bash
@@ -63,11 +75,11 @@ The report contains:
 - observed match level;
 - top retrieval score.
 
-## 4. What CI tests in v0.2
+## 4. CI strategy in v0.2
 
-CI deliberately does **not** download a large embedding model for every push. Instead, semantic retrieval logic is tested with a deterministic embedding test double.
+The lightweight CI runs on every push and currently passes **10 automated tests**. It also executes the lexical E2E agent, factual-safety evaluation, and retrieval benchmark CLI.
 
-The tests verify that:
+Semantic retrieval logic is unit-tested with a deterministic embedding test double so ranking behavior can be validated without network/model downloads. The tests verify that:
 
 - lexical retrieval can remain a gap when wording has no token overlap;
 - embedding retrieval can recover the intended semantically equivalent claim;
@@ -76,7 +88,7 @@ The tests verify that:
 - benchmark metrics are machine-readable;
 - all original guardrail and E2E behavior remains intact.
 
-A real embedding model is an integration dependency, while retrieval ranking and safety behavior remain unit-testable without network access.
+A separate **Semantic Retrieval Benchmark** workflow installs the real optional Sentence Transformers dependency and runs embedding + hybrid benchmark integrations whenever retrieval-related files change, or manually through `workflow_dispatch`.
 
 ## 5. Metrics for the next calibration cycle
 
