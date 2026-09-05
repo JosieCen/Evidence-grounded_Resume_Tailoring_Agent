@@ -3,6 +3,10 @@
 [![CI](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/ci.yml/badge.svg)](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/ci.yml)
 [![Semantic Benchmark](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/semantic-benchmark.yml/badge.svg)](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/semantic-benchmark.yml)
 
+<p align="center">
+  <img src="Illustration.png" alt="Evidence-grounded Resume Tailoring Agent workflow illustration" width="100%">
+</p>
+
 A privacy-safe portfolio project for **tailoring resume content to a job description without inventing experience**.
 
 **v0.3 moves the project from evidence retrieval + filtering toward an actual tailoring workflow:** it adds structured JD analysis with stable requirement IDs, multilingual semantic retrieval, evidence-constrained rewriting, evidence-based revision, a baseline-to-application change log, a verified evidence registry, and a 72-case labeled benchmark.
