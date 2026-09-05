@@ -17,15 +17,9 @@ Turn the public prototype from a retrieval-and-filtering demo into a credible ev
 9. English/Chinese matching is represented in the public fixture.
 10. Lightweight CI remains dependency-light; real embedding evaluation runs separately.
 
-## Work packages
+## Implemented work packages
 
-1. Structured JD layer: classify responsibilities, must-haves, nice-to-haves; use content-stable IDs.
-2. Evidence model: add evidence registry and claim-owned authorized paraphrases.
-3. Controlled drafting/revision: preserve provenance and repair unsafe sourced bullets from evidence.
-4. Baseline-aware workflow: emit a before/after change log.
-5. Retrieval/safety: multilingual model, weighted lexical matching, unsupported-scope gate, multi-source metric ownership.
-6. Evaluation: expand 6 → 72 cases with semantic, bilingual, numeric, overclaim, gap, and seniority categories.
-7. Product surface: update Streamlit, docs, CI, and public demos.
+Structured JD parsing; evidence registry; claim-owned authorized paraphrases; evidence-constrained drafting; rewrite-based revision; baseline-aware change logging; multilingual retrieval; unsupported-scope gate; multi-source metric ownership; 72-case evaluation; Streamlit review; and CI-generated reproducible outputs.
 
 ## Deliberately out of scope
 

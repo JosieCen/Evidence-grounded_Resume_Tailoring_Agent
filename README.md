@@ -64,7 +64,7 @@ The lexical baseline on the committed v0.3 fixture is:
 | Embedding | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions |
 | Hybrid | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions |
 
-The Semantic Retrieval Benchmark workflow runs the multilingual embedding and hybrid variants with a real Sentence Transformers model and uploads machine-readable reports. Aggregate values are committed in `examples/retrieval_baseline_summary.json` when refreshed. These are retrieval/safety fixture metrics, **not ATS scores or hiring outcomes**.
+The Semantic Retrieval Benchmark workflow runs the multilingual embedding and hybrid variants with a real Sentence Transformers model and uploads machine-readable reports. `examples/retrieval_baseline_summary.json` stores the committed baseline summary. These are retrieval/safety fixture metrics, **not ATS scores or hiring outcomes**.
 
 ## Benchmark categories
 
@@ -76,16 +76,6 @@ Positive retrieval covers `lexical_control`, `semantic_transfer`, `bilingual_zh`
 
 Requirement IDs are content-stable hashes rather than `req_01`, `req_02`, etc. Adding an unrelated JD line therefore does not renumber existing requirements. Supported types are `responsibility`, `must_have`, and `nice_to_have`, each with priority metadata.
 
-```yaml
-id: req_a7c5bfc712
-text: Use data analysis to identify patterns and turn findings into actionable insights.
-kind: must_have
-priority: high
-match_level: STRONG_MATCH
-source_claim_ids:
-  - claim_data_analysis_4800
-```
-
 ## Evidence-constrained tailoring
 
 The default generator does **not** free-write new factual propositions. Each claim can expose canonical verified text, evidence-preserving paraphrases, source evidence IDs, owned metrics, and `do_not_claim` boundaries. The agent selects the wording variant that best fits the matched JD requirement while keeping the same provenance attached.
@@ -94,23 +84,11 @@ This is intentionally conservative. The generator interface can later be replace
 
 ## Real revision instead of delete-only filtering
 
-The unsafe demo mutates a **sourced** bullet into unsupported ownership/revenue wording. The audit catches the forbidden scope and untraceable `42%`; revision then reconstructs the bullet from its authorized source claim and re-runs the audit. Only a bullet with no recoverable authorized source is removed.
-
-```text
-unsafe sourced draft
-        ↓
-forbidden phrase + untraceable number
-        ↓
-rewrite from verified claim/paraphrase pool
-        ↓
-re-audit
-        ↓
-pass
-```
+The unsafe demo mutates a **sourced** bullet into unsupported ownership/revenue wording. The audit catches the forbidden scope and untraceable `42%`; revision reconstructs the bullet from its authorized source claim and re-runs the audit. Only a bullet with no recoverable authorized source is removed.
 
 ## Baseline → application workflow
 
-The public demo includes a fictional baseline resume. A run starts from that baseline and produces a tailored resume plus `change_log.json`. Changes are labeled `unchanged`, `rephrased`, `added`, or `not_selected`, avoiding the unrealistic pattern of recreating the candidate from scratch for every application.
+The public fixture includes a fictional baseline resume. A run starts from that baseline and produces a tailored resume plus `change_log.json`. Changes are labeled `unchanged`, `rephrased`, `added`, or `not_selected`, avoiding the unrealistic pattern of recreating the candidate from scratch for every application.
 
 ## Quick start
 
@@ -128,7 +106,7 @@ resume-agent run \
   --retriever lexical
 ```
 
-Generated artifacts:
+Generated artifacts are intentionally not versioned; the CLI and CI reproduce them:
 
 ```text
 outputs/demo/
@@ -142,17 +120,7 @@ outputs/demo/
 
 ## Semantic / hybrid retrieval
 
-```bash
-pip install -e ".[dev,embedding]"
-resume-agent run \
-  --profile examples/fictional_profile.yaml \
-  --jd examples/fictional_jd.md \
-  --baseline examples/fictional_baseline_resume.yaml \
-  --output outputs/hybrid_demo \
-  --retriever hybrid
-```
-
-The default semantic model in v0.3 is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, matching the public benchmark's English/Chinese application scenario more closely than the previous English-focused default.
+The default semantic model in v0.3 is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`. Install with `pip install -e ".[dev,embedding]"` and use `--retriever embedding` or `--retriever hybrid`.
 
 ## Retrieval benchmark
 
@@ -169,52 +137,14 @@ Reports include positive Top-1 accuracy, Recall@3, explicit-gap accuracy, false-
 ## Guardrail evaluation
 
 ```bash
-resume-agent evaluate \
-  --profile examples/fictional_profile.yaml \
-  --output outputs/evaluation.json
+resume-agent evaluate --profile examples/fictional_profile.yaml --output outputs/evaluation.json
 ```
 
 v0.3 CI verifies missing/unknown sources, unverified/hidden claims, evidence-registry resolution, forbidden wording, number/metric ownership including valid multi-source unions, unsupported-scope gaps, rewrite-based recovery, stable JD IDs, and minimum benchmark size/category coverage.
 
 ## Streamlit demo
 
-```bash
-pip install -e ".[ui]"
-streamlit run app.py
-```
-
-For embedding/hybrid mode use `pip install -e ".[ui,embedding]"`. The UI shows requirement type/priority, match scores, source IDs, unsupported-scope notes, tailored output, before/after changes, safety audit, and full run trace.
-
-## Repository structure
-
-```text
-Evidence-grounded_Resume_Tailoring_Agent/
-├── src/evidence_grounded_resume_agent/
-│   ├── agent.py
-│   ├── application.py
-│   ├── generation.py
-│   ├── guardrails.py
-│   ├── jd.py
-│   ├── retrieval.py
-│   ├── retrieval_evaluation.py
-│   ├── evaluation.py
-│   ├── profile.py
-│   ├── tools.py
-│   ├── render.py
-│   └── cli.py
-├── examples/
-│   ├── fictional_profile.yaml
-│   ├── fictional_baseline_resume.yaml
-│   ├── fictional_jd.md
-│   ├── retrieval_benchmark.yaml
-│   ├── retrieval_baseline_summary.json
-│   ├── generated_demo/
-│   └── generated_unsafe_demo/
-├── tests/
-├── docs/
-├── app.py
-└── .github/workflows/
-```
+Install `.[ui]` and run `streamlit run app.py`; for embedding/hybrid use `.[ui,embedding]`. The UI shows requirement type/priority, match scores, source IDs, unsupported-scope notes, tailored output, before/after changes, safety audit, and full run trace.
 
 ## Design choices
 
