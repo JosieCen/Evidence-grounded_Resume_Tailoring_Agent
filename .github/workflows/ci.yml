@@ -15,6 +15,20 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -e ".[dev]"
       - run: pytest
-      - run: resume-agent run --profile examples/fictional_profile.yaml --jd examples/fictional_jd.md --output outputs/demo
+      - name: Run baseline-aware demo
+        run: |
+          resume-agent run \
+            --profile examples/fictional_profile.yaml \
+            --jd examples/fictional_jd.md \
+            --baseline examples/fictional_baseline_resume.yaml \
+            --output outputs/demo
+      - name: Verify rewrite-based unsafe-draft recovery
+        run: |
+          resume-agent run \
+            --profile examples/fictional_profile.yaml \
+            --jd examples/fictional_jd.md \
+            --baseline examples/fictional_baseline_resume.yaml \
+            --output outputs/unsafe_demo \
+            --simulate-unsafe-draft
       - run: resume-agent evaluate --profile examples/fictional_profile.yaml --output outputs/evaluation.json
       - run: resume-agent benchmark-retrieval --profile examples/fictional_profile.yaml --benchmark examples/retrieval_benchmark.yaml --retriever lexical --output outputs/lexical_benchmark.json
