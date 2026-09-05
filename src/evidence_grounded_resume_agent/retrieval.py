@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import re
 from typing import Protocol, Sequence
 
 from .models import Claim, Match, Requirement
 from .tools import expand_tokens, tokenize
 
 
-DEFAULT_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+DEFAULT_EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 
 class TextEmbedder(Protocol):
@@ -50,10 +51,10 @@ class RetrievalConfig:
     top_k: int = 3
     lexical_weight: float = 0.35
     semantic_weight: float = 0.65
-    min_semantic_score: float = 0.28
-    strong_semantic_score: float = 0.55
-    min_hybrid_score: float = 0.20
-    strong_hybrid_score: float = 0.45
+    min_semantic_score: float = 0.30
+    strong_semantic_score: float = 0.58
+    min_hybrid_score: float = 0.22
+    strong_hybrid_score: float = 0.48
 
     def __post_init__(self) -> None:
         if self.mode not in {"lexical", "embedding", "hybrid"}:
@@ -67,17 +68,25 @@ class RetrievalConfig:
 
 
 def _claim_search_text(claim: Claim) -> str:
-    return " ".join([claim.text, *claim.tags])
+    return " ".join([claim.text, *claim.tags, *claim.paraphrases])
 
 
 def _lexical_features(requirement: Requirement, claim: Claim) -> tuple[float, list[str]]:
-    req_tokens = expand_tokens(requirement.tokens)
-    claim_tokens = expand_tokens(tokenize(_claim_search_text(claim)))
-    overlap = sorted(req_tokens.intersection(claim_tokens))
-    if not overlap:
+    req_surface = set(requirement.tokens)
+    claim_surface = set(tokenize(_claim_search_text(claim)))
+    exact = req_surface.intersection(claim_surface)
+
+    req_expanded = expand_tokens(req_surface)
+    claim_expanded = expand_tokens(claim_surface)
+    semantic_overlap = req_expanded.intersection(claim_expanded).difference(exact)
+
+    if not exact and not semantic_overlap:
         return 0.0, []
-    denominator = max(3, min(len(req_tokens), 10))
-    return min(1.0, len(overlap) / denominator), overlap
+
+    denominator = max(3, min(len(req_surface), 10))
+    weighted_overlap = len(exact) + 0.25 * len(semantic_overlap)
+    overlap = sorted(exact) + [f"~{item}" for item in sorted(semantic_overlap)]
+    return min(1.0, weighted_overlap / denominator), overlap
 
 
 def cosine_similarity(left: Sequence[float], right: Sequence[float]) -> float:
@@ -113,12 +122,40 @@ def _semantic_scores(
     return scores
 
 
+def _surface_tokens(text: str) -> set[str]:
+    return set(
+        re.findall(r"[a-zA-Z][a-zA-Z0-9+.-]{1,}|[\u4e00-\u9fff]{2,8}", text.casefold())
+    )
+
+
+def requirement_hits_unsupported_scope(
+    requirement: Requirement,
+    unsupported_phrases: Sequence[str],
+) -> str | None:
+    normalized = " ".join(requirement.text.casefold().split())
+    req_tokens = _surface_tokens(normalized)
+    for phrase in unsupported_phrases:
+        phrase_normalized = " ".join(str(phrase).casefold().split())
+        if not phrase_normalized:
+            continue
+        if phrase_normalized in normalized:
+            return str(phrase)
+        phrase_tokens = _surface_tokens(phrase_normalized)
+        if phrase_tokens:
+            overlap = req_tokens.intersection(phrase_tokens)
+            coverage = len(overlap) / max(1, len(phrase_tokens))
+            if len(overlap) >= 2 and coverage >= 0.75:
+                return str(phrase)
+    return None
+
+
 def match_requirements(
     requirements: list[Requirement],
     claims: dict[str, Claim],
     *,
     config: RetrievalConfig | None = None,
     embedder: TextEmbedder | None = None,
+    unsupported_phrases: Sequence[str] = (),
 ) -> list[Match]:
     """Rank authorized claims for each requirement using lexical, embedding, or hybrid retrieval."""
 
@@ -134,6 +171,24 @@ def match_requirements(
 
     matches: list[Match] = []
     for requirement in requirements:
+        blocked_phrase = requirement_hits_unsupported_scope(requirement, unsupported_phrases)
+        if blocked_phrase is not None:
+            matches.append(
+                Match(
+                    requirement_id=requirement.id,
+                    requirement_text=requirement.text,
+                    match_level="GAP",
+                    source_claim_ids=[],
+                    overlap_tokens=[],
+                    retrieval_mode=config.mode,
+                    top_score=0.0,
+                    candidate_scores=[],
+                    requirement_kind=requirement.kind,
+                    requirement_priority=requirement.priority,
+                    authorization_note=f"Blocked by unsupported scope: {blocked_phrase}",
+                )
+            )
+            continue
         ranked: list[dict[str, object]] = []
         for claim_id, claim in claims.items():
             lexical_score, overlap = _lexical_features(requirement, claim)
@@ -198,6 +253,9 @@ def match_requirements(
                 retrieval_mode=config.mode,
                 top_score=float(selected[0]["combined_score"]) if selected else 0.0,
                 candidate_scores=[dict(item) for item in selected],
+                requirement_kind=requirement.kind,
+                requirement_priority=requirement.priority,
+                authorization_note=None,
             )
         )
     return matches

@@ -5,6 +5,7 @@ from collections import defaultdict
 from typing import Iterable
 
 from .models import Claim, DraftBullet, Entity, Match, Requirement
+from .profile import EvidenceRecord, evidence_issues
 
 
 STOPWORDS = {
@@ -14,14 +15,41 @@ STOPWORDS = {
 }
 
 SYNONYMS = {
-    "llm": {"large language model", "language model", "generative ai"},
-    "evaluation": {"assessment", "validation", "benchmark", "qa"},
-    "product": {"prd", "requirement", "mvp", "roadmap"},
-    "clinical": {"medical", "healthcare", "patient"},
+    "llm": {"large language model", "language model", "generative ai", "genai"},
+    "evaluation": {"assessment", "validation", "benchmark", "qa", "testing"},
+    "product": {"prd", "requirement", "requirements", "mvp", "roadmap"},
+    "clinical": {"medical", "healthcare", "patient", "clinician"},
     "evidence": {"literature", "source", "provenance", "citation"},
     "automation": {"pipeline", "workflow", "orchestration"},
     "python": {"scripting", "programming"},
-    "communication": {"presentation", "scientific writing", "stakeholder"},
+    "communication": {"communicate", "communicated", "explain", "explained", "clear", "clearly", "presentation", "scientific writing", "stakeholder", "stakeholders", "training"},
+    "analysis": {"analytics", "data", "insight"},
+    "project": {"milestone", "planning", "coordination", "delivery"},
+    "reproducibility": {"versioning", "testing", "traceability", "audit"},
+    "research": {"study", "literature", "scientific"},
+}
+
+ZH_TERMS = {
+    "产品需求": {"product", "requirement"},
+    "临床": {"clinical", "medical"},
+    "医疗": {"clinical", "healthcare"},
+    "大模型": {"llm", "generative ai"},
+    "生成式ai": {"llm", "generative ai"},
+    "幻觉": {"hallucination", "llm"},
+    "评估": {"evaluation", "validation"},
+    "自动化": {"automation", "workflow"},
+    "工作流": {"workflow", "automation"},
+    "证据": {"evidence", "literature"},
+    "科研": {"research", "scientific"},
+    "沟通": {"communication", "stakeholder"},
+    "跨团队": {"communication", "project"},
+    "数据分析": {"analysis", "data"},
+    "培训": {"training", "communication"},
+    "复现": {"reproducibility", "traceability"},
+    "版本": {"reproducibility", "versioning"},
+    "里程碑": {"project", "milestone"},
+    "用户": {"user", "product"},
+    "医生": {"clinician", "clinical"},
 }
 
 
@@ -30,8 +58,15 @@ def normalize_text(text: str) -> str:
 
 
 def tokenize(text: str) -> tuple[str, ...]:
-    words = re.findall(r"[a-zA-Z][a-zA-Z0-9+.-]{1,}|[\u4e00-\u9fff]{2,}", normalize_text(text))
+    normalized = normalize_text(text)
+    words = re.findall(r"[a-zA-Z][a-zA-Z0-9+.-]{1,}", normalized)
     clean = [word for word in words if word not in STOPWORDS and len(word) > 1]
+    for phrase, expansions in ZH_TERMS.items():
+        if phrase in normalized:
+            clean.append(phrase)
+            clean.extend(sorted(expansions))
+    chinese_chunks = re.findall(r"[\u4e00-\u9fff]{2,8}", normalized)
+    clean.extend(chinese_chunks)
     return tuple(dict.fromkeys(clean))
 
 
@@ -45,96 +80,53 @@ def expand_tokens(tokens: Iterable[str]) -> set[str]:
     return expanded
 
 
-def parse_jd(jd_text: str) -> list[Requirement]:
-    requirements: list[Requirement] = []
-    for raw_line in jd_text.splitlines():
-        line = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", raw_line).strip()
-        if not line or line.startswith("#") or len(line) < 12:
-            continue
-        requirements.append(
-            Requirement(
-                id=f"req_{len(requirements)+1:02d}",
-                text=line,
-                tokens=tokenize(line),
-            )
-        )
-    return requirements[:30]
-
-
-def eligible_claims(claims: dict[str, Claim]) -> dict[str, Claim]:
+def eligible_claims(
+    claims: dict[str, Claim],
+    evidence: dict[str, EvidenceRecord] | None = None,
+) -> dict[str, Claim]:
     return {
         claim_id: claim
         for claim_id, claim in claims.items()
-        if claim.status == "verified" and claim.visible and claim.evidence_refs
+        if claim.status == "verified"
+        and claim.visible
+        and claim.evidence_refs
+        and not (evidence_issues(claim, evidence or {}) if evidence is not None else [])
     }
 
 
-def match_requirements(requirements: list[Requirement], claims: dict[str, Claim]) -> list[Match]:
-    matches: list[Match] = []
-    for requirement in requirements:
-        req_tokens = expand_tokens(requirement.tokens)
-        ranked: list[tuple[float, str, list[str]]] = []
-        for claim_id, claim in claims.items():
-            claim_tokens = expand_tokens(tokenize(" ".join([claim.text, *claim.tags])))
-            overlap = sorted(req_tokens.intersection(claim_tokens))
-            if not overlap:
-                continue
-            denominator = max(3, min(len(req_tokens), 10))
-            score = min(1.0, len(overlap) / denominator)
-            ranked.append((score, claim_id, overlap))
-        ranked.sort(reverse=True)
-        selected = ranked[:3]
-        if not selected:
-            level = "GAP"
-        elif selected[0][0] >= 0.45 or len(selected[0][2]) >= 3:
-            level = "STRONG_MATCH"
-        else:
-            level = "PARTIAL_MATCH"
-        matches.append(
-            Match(
-                requirement_id=requirement.id,
-                requirement_text=requirement.text,
-                match_level=level,
-                source_claim_ids=[item[1] for item in selected],
-                overlap_tokens=selected[0][2] if selected else [],
-            )
-        )
-    return matches
+def select_claims(matches: list[Match], max_claims: int = 10) -> list[str]:
+    """Select for requirement coverage first, then fill remaining slots by aggregate relevance."""
 
+    selected: list[str] = []
+    for match in matches:
+        if match.match_level == "GAP" or not match.source_claim_ids:
+            continue
+        top = match.source_claim_ids[0]
+        if top not in selected:
+            selected.append(top)
+        if len(selected) >= max_claims:
+            return selected
 
-def select_claims(matches: list[Match], max_claims: int = 6) -> list[str]:
     scores: defaultdict[str, int] = defaultdict(int)
     for match in matches:
         if match.match_level == "GAP":
             continue
-        weight = 3 if match.match_level == "STRONG_MATCH" else 1
+        weight = 4 if match.match_level == "STRONG_MATCH" else 2
+        if match.requirement_priority == "medium":
+            weight = max(1, weight - 1)
         for rank, claim_id in enumerate(match.source_claim_ids):
             scores[claim_id] += max(1, weight - rank)
-    return [claim_id for claim_id, _ in sorted(scores.items(), key=lambda item: (-item[1], item[0]))[:max_claims]]
+
+    for claim_id, _ in sorted(scores.items(), key=lambda item: (-item[1], item[0])):
+        if claim_id not in selected:
+            selected.append(claim_id)
+        if len(selected) >= max_claims:
+            break
+    return selected
 
 
-def compose_bullets(
-    selected_claim_ids: list[str],
-    matches: list[Match],
-    claims: dict[str, Claim],
-) -> list[DraftBullet]:
-    requirement_by_claim: defaultdict[str, list[str]] = defaultdict(list)
-    for match in matches:
-        for claim_id in match.source_claim_ids:
-            requirement_by_claim[claim_id].append(match.requirement_id)
-
-    bullets: list[DraftBullet] = []
-    for claim_id in selected_claim_ids:
-        claim = claims[claim_id]
-        bullets.append(
-            DraftBullet(
-                text=claim.text,
-                source_claim_ids=[claim_id],
-                requirement_ids=sorted(set(requirement_by_claim[claim_id])),
-                metric_ids=[str(metric["id"]) for metric in claim.metrics if "id" in metric],
-            )
-        )
-    return bullets
+def requirement_by_id(requirements: list[Requirement]) -> dict[str, Requirement]:
+    return {item.id: item for item in requirements}
 
 
 def group_bullets_by_entity(

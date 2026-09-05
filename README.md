@@ -1,133 +1,128 @@
 # Evidence-grounded Resume Tailoring Agent
 
 [![CI](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/ci.yml/badge.svg)](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/ci.yml)
+[![Semantic Benchmark](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/semantic-benchmark.yml/badge.svg)](https://github.com/JosieCen/Evidence-grounded_Resume_Tailoring_Agent/actions/workflows/semantic-benchmark.yml)
 
-A privacy-safe AI-agent showcase for **tailoring resume content to a job description without inventing experience**.
+A privacy-safe portfolio project for **tailoring resume content to a job description without inventing experience**.
 
-**v0.2 adds pluggable semantic retrieval** while preserving deterministic factual authorization. The system can run with lexical matching, Sentence Transformers embeddings, or a hybrid retriever. Semantic similarity can propose evidence; it cannot authorize an unsupported claim.
+**v0.3 moves the project from evidence retrieval + filtering toward an actual tailoring workflow:** it adds structured JD analysis with stable requirement IDs, multilingual semantic retrieval, evidence-constrained rewriting, evidence-based revision, a baseline-to-application change log, a verified evidence registry, and a 72-case labeled benchmark.
 
-> **Public-showcase boundary:** every person, organization, job description, metric and artifact in this repository is fictional. No private application data or real contact information is included.
+> **Public-showcase boundary:** every person, organization, job description, metric, evidence record, and artifact in this repository is fictional. No private resume or application data is included.
 
 ## Product question
 
-Generic LLM resume rewriting can improve relevance, but it can also fabricate responsibilities, inflate partial matches, detach numbers from evidence, or hide genuine gaps. A purely lexical matcher has the opposite problem: it can miss transferable experience when the JD and profile use different wording.
+Generic LLM resume rewriting can make a resume sound relevant while quietly changing facts. Keyword matching has the opposite failure mode: it can preserve facts but miss transferable experience when the JD uses different language.
 
-> **How can an agent improve semantic recall while preserving claim-level provenance and refusing unsupported claims?**
+> **How can a tailoring agent recover semantically relevant evidence, rewrite only within authorized factual boundaries, keep gaps visible, and make every change auditable?**
 
-## Agent workflow
+## v0.3 workflow
 
 ```mermaid
 flowchart LR
-    A[Structured verified claims] --> C[Evidence retrieval]
-    J[Job description] --> B[JD parser]
-    B --> C
-    C --> D[Claim planner]
-    D --> E[Draft tool]
-    E --> F[Deterministic guardrail audit]
-    F -->|Pass| G[Finalize]
-    F -->|Violation| H[Revision step]
-    H --> F
-    G --> I[resume.md]
-    G --> K[jd_analysis.yaml]
-    G --> L[audit.json]
-    G --> M[run_trace.json]
+    P[Verified evidence registry] --> C[Eligible claims]
+    B[Baseline resume] --> D[Application context]
+    J[Job description] --> A[Structured JD parser]
+    A --> R[Lexical / embedding / hybrid retrieval]
+    C --> R
+    R --> S[Coverage-first claim planner]
+    S --> G[Evidence-constrained drafting]
+    D --> G
+    G --> Q[Deterministic audit]
+    Q -->|Pass| F[Finalize]
+    Q -->|Violation| V[Rewrite from authorized evidence]
+    V --> Q
+    F --> O1[resume.md / resume.yaml]
+    F --> O2[jd_analysis.yaml]
+    F --> O3[change_log.json]
+    F --> O4[audit.json / run_trace.json]
 ```
 
-The retrieval layer is replaceable; the evidence contract and final authorization layer are not.
+Semantic similarity can **propose** evidence. It cannot override `verified`, `visible`, evidence-registry, metric-ownership, or `do_not_claim` rules.
 
-## v0.2 retrieval modes
+## What changed in v0.3
 
-| Mode | Purpose | Dependency |
+| Area | v0.2 | v0.3 |
 | --- | --- | --- |
-| `lexical` | Transparent token/synonym baseline | Core package only |
-| `embedding` | Semantic similarity for paraphrases and transferable experience | Optional Sentence Transformers |
-| `hybrid` | Weighted lexical + semantic retrieval | Optional Sentence Transformers |
+| JD parsing | One requirement per non-empty line; sequential IDs | Structured responsibility / must-have / nice-to-have classification with content-stable IDs |
+| Retrieval | English-first lexical / embedding / hybrid | Multilingual default embedding model + weighted lexical scoring + explicit unsupported-scope gate |
+| Drafting | Claim text copied directly into output | JD-aware selection among evidence-authorized wording variants |
+| Revision | Invalid bullets removed | Sourced bullets are rewritten from authorized evidence, then re-audited; only unrecoverable bullets are dropped |
+| Provenance | Claim-level `evidence_refs` strings | Evidence registry + claim provenance + metric ownership |
+| Workflow | JD → generated resume | Baseline resume + JD → tailored application + before/after change log |
+| Benchmark | 6 cases | **72 cases** across semantic, bilingual, numeric, overclaim, seniority, and explicit-gap scenarios |
+| Evaluation | Aggregate retrieval metrics | Positive retrieval, explicit-gap false positives, forbidden-top1 rate, overall accuracy, and per-category metrics |
 
-The default embedding adapter uses `sentence-transformers/all-MiniLM-L6-v2`. Retrieval outputs expose lexical, semantic, and combined scores so the evidence map remains inspectable.
+## 72-case retrieval benchmark
 
-## Current retrieval benchmark
+The public fixture contains **72 labeled cases**: **48 supported requirements**, **24 explicit gaps / hard negatives**, and **24 Chinese-language cases**. It covers 12 lexical controls, 12 semantic-transfer cases, 12 bilingual Chinese cases, 7 transferable-capability cases, 5 numeric-provenance cases, 8 explicit gaps, 8 overclaim traps, and 8 seniority hard negatives.
 
-A six-case fictional benchmark intentionally contains semantic paraphrases, lexical controls, and one unsupported commercial requirement.
+The v0.3 benchmark was executed in GitHub Actions with the real multilingual Sentence Transformers model (`paraphrase-multilingual-MiniLM-L12-v2`):
 
-| Retriever | Top-1 accuracy | Recall@3 | Gap accuracy |
-| --- | ---: | ---: | ---: |
-| Lexical | 66.7% | 83.3% | 100% |
-| Embedding | **83.3%** | **100%** | **100%** |
-| Hybrid | **83.3%** | **100%** | **100%** |
+| Retriever | Positive Top-1 | Recall@3 | Gap accuracy | Overall case accuracy |
+| --- | ---: | ---: | ---: | ---: |
+| Lexical | **83.3%** | **100%** | **100%** | **88.9%** |
+| Embedding | **93.8%** | **100%** | **100%** | **95.8%** |
+| Hybrid | **97.9%** | **100%** | **100%** | **98.6%** |
 
-### Why semantic retrieval matters — one concrete case
+All three retrievers kept the false-positive rate on the 24 gap/hard-negative cases at **0%** and the forbidden-Top-1 rate at **0%**. Hybrid reached 100% Top-1 on the bilingual and semantic-transfer groups; its only Top-1 miss was a deliberately ambiguous transferable-capability case where clinician interviews ranked just above the workflow-evaluation claim, while the expected claim still appeared at rank 2. I keep that miss visible rather than tuning the fixture to force a perfect score.
 
-**JD requirement**
+The Semantic Retrieval Benchmark workflow publishes machine-readable lexical, embedding, hybrid, and aggregate reports. `examples/retrieval_baseline_summary.json` stores the committed aggregate summary. These are retrieval/safety fixture metrics, **not ATS scores or hiring outcomes**.
 
-> Explain complex technical findings clearly to non-specialist audiences.
+## Benchmark categories
 
-**Verified profile evidence**
+Positive retrieval covers `lexical_control`, `semantic_transfer`, `bilingual_zh`, `transferable_capability`, and `numeric_provenance`. Negative/scope-safety cases cover `explicit_gap`, `overclaim_trap`, and `seniority_hard_negative`.
 
-> Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.
+`do_not_claim` also exists at the profile level. Known unsupported scopes are rejected **before similarity ranking**, so a highly similar but unauthorized claim cannot turn a known gap into a match.
 
-A human reader can see that both statements describe the same underlying capability: **turning complex scientific information into clear communication**. But they share very little wording.
+## Structured JD analysis
 
-- **Lexical retrieval:** returns `GAP` because it mainly depends on token/synonym overlap.
-- **Embedding retrieval:** returns `PARTIAL_MATCH` and correctly retrieves `claim_scientific_communication` because the two sentences are close in semantic meaning even without shared keywords.
-- **Hybrid retrieval:** also retrieves `claim_scientific_communication` by combining lexical evidence with embedding similarity.
+Requirement IDs are content-stable hashes rather than `req_01`, `req_02`, etc. Adding an unrelated JD line therefore does not renumber existing requirements. Supported types are `responsibility`, `must_have`, and `nice_to_have`, each with priority metadata.
 
-This is the main value of v0.2: **recover transferable evidence that keyword matching can miss, while still requiring deterministic factual authorization before any claim can appear in the final resume.**
+## Evidence-constrained tailoring
 
-The real-model benchmark runs in GitHub Actions and publishes machine-readable artifacts. Aggregate values are committed in [`examples/retrieval_baseline_summary.json`](examples/retrieval_baseline_summary.json).
+The default generator does **not** free-write new factual propositions. Each claim can expose canonical verified text, evidence-preserving paraphrases, source evidence IDs, owned metrics, and `do_not_claim` boundaries. The agent selects the wording variant that best fits the matched JD requirement while keeping the same provenance attached.
 
-These results measure retrieval behavior on a small fictional benchmark, **not hiring outcomes**.
+This is intentionally conservative. The generator interface can later be replaced by an LLM, but any future generator still sits upstream of the same deterministic authorization layer.
 
-## Core design decisions
+## Real revision instead of delete-only filtering
 
-| Decision | Rationale |
-| --- | --- |
-| Structured claims as the source of truth | Generated text must not become a new factual database. |
-| Claim-level `evidence_refs` | Every visible bullet can be audited back to evidence. |
-| `verified`, `visible`, and `do_not_claim` gates | A known fact may still be unsuitable for resume use. |
-| GAP stays GAP | Retrieval cannot solve a mismatch by inventing experience. |
-| Numeric traceability | Numbers require source-owned metric records. |
-| Semantic retrieval ≠ factual authorization | Similarity proposes candidates; deterministic rules authorize them. |
-| Explicit run trace | Retrieval and revision decisions remain inspectable. |
+The unsafe demo mutates a **sourced** bullet into unsupported ownership/revenue wording. The audit catches the forbidden scope and untraceable `42%`; revision reconstructs the bullet from its authorized source claim and re-runs the audit. Only a bullet with no recoverable authorized source is removed.
 
-## Quick start — lightweight lexical mode
+## Baseline → application workflow
+
+The public fixture includes a fictional baseline resume. A run starts from that baseline and produces a tailored resume plus `change_log.json`. Changes are labeled `unchanged`, `rephrased`, `added`, or `not_selected`, avoiding the unrealistic pattern of recreating the candidate from scratch for every application.
+
+## Quick start
 
 ```bash
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # macOS/Linux: source .venv/bin/activate
-
 pip install -e ".[dev]"
 
 resume-agent run \
   --profile examples/fictional_profile.yaml \
   --jd examples/fictional_jd.md \
+  --baseline examples/fictional_baseline_resume.yaml \
   --output outputs/demo \
   --retriever lexical
 ```
 
-Generated artifacts:
+Generated artifacts are intentionally not versioned; the CLI and CI reproduce them:
 
 ```text
 outputs/demo/
-├── jd_analysis.yaml   # requirement -> ranked evidence + scores + gaps
-├── resume.md          # evidence-authorized output
-├── audit.json         # factual-safety result + traceability
-└── run_trace.json     # controller/tool decision trace
+├── jd_analysis.yaml
+├── resume.yaml
+├── resume.md
+├── change_log.json
+├── audit.json
+└── run_trace.json
 ```
 
 ## Semantic / hybrid retrieval
 
-```bash
-pip install -e ".[dev,embedding]"
-
-resume-agent run \
-  --profile examples/fictional_profile.yaml \
-  --jd examples/fictional_jd.md \
-  --output outputs/hybrid_demo \
-  --retriever hybrid
-```
-
-Use `--retriever embedding` for pure embedding retrieval. A custom Sentence Transformers model can be supplied with `--embedding-model`.
+The default semantic model in v0.3 is `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`. Install with `pip install -e ".[dev,embedding]"` and use `--retriever embedding` or `--retriever hybrid`.
 
 ## Retrieval benchmark
 
@@ -139,119 +134,53 @@ resume-agent benchmark-retrieval \
   --output outputs/lexical_benchmark.json
 ```
 
-After installing the embedding extra, rerun with `--retriever embedding` or `--retriever hybrid`. The report includes top-1 accuracy, recall@3, explicit-gap accuracy, selected claim IDs, match level, and retrieval scores.
-
-This deliberately separates **semantic relevance evaluation** from **factual safety evaluation**.
+Reports include positive Top-1 accuracy, Recall@3, explicit-gap accuracy, false-positive rate on gap cases, forbidden-top1 rate, overall case accuracy, per-category metrics, and per-case observed claim IDs/scores.
 
 ## Guardrail evaluation
 
 ```bash
-resume-agent evaluate \
-  --profile examples/fictional_profile.yaml \
-  --output outputs/evaluation.json
+resume-agent evaluate --profile examples/fictional_profile.yaml --output outputs/evaluation.json
 ```
 
-Current baselines:
-
-- **10 automated tests pass** in lightweight CI;
-- **7/7 synthetic factual-safety cases pass**;
-- missing/unknown sources are blocked;
-- unverified and hidden claims are blocked;
-- forbidden wording is blocked;
-- untraceable numbers are blocked;
-- verified, traceable claims are allowed;
-- the E2E demo preserves an unsupported JD requirement as an explicit `GAP`.
-
-The unsafe-draft demo still verifies the audit/revision loop:
-
-```bash
-resume-agent run \
-  --profile examples/fictional_profile.yaml \
-  --jd examples/fictional_jd.md \
-  --output outputs/unsafe_demo \
-  --simulate-unsafe-draft
-```
-
-The injected unsupported production/revenue claim is removed before finalization.
+v0.3 CI verifies missing/unknown sources, unverified/hidden claims, evidence-registry resolution, forbidden wording, number/metric ownership including valid multi-source unions, unsupported-scope gaps, rewrite-based recovery, stable JD IDs, and minimum benchmark size/category coverage.
 
 ## Streamlit demo
 
-```bash
-pip install -e ".[ui]"
-streamlit run app.py
-```
+Install `.[ui]` and run `streamlit run app.py`; for embedding/hybrid use `.[ui,embedding]`. The UI shows requirement type/priority, match scores, source IDs, unsupported-scope notes, tailored output, before/after changes, safety audit, and full run trace.
 
-For embedding/hybrid mode:
+## Design choices
 
-```bash
-pip install -e ".[ui,embedding]"
-streamlit run app.py
-```
-
-The UI exposes retriever selection, retrieval scores, requirement-to-evidence mapping, tailored output, and the final audit.
-
-## Repository structure
-
-```text
-Evidence-grounded_Resume_Tailoring_Agent/
-├── src/evidence_grounded_resume_agent/
-│   ├── agent.py                  # controller + audit/revision loop
-│   ├── retrieval.py              # lexical / embedding / hybrid retrieval
-│   ├── retrieval_evaluation.py   # labeled retrieval benchmark
-│   ├── tools.py                  # JD parsing, planning, drafting
-│   ├── guardrails.py             # deterministic factual authorization
-│   ├── profile.py                # structured evidence model
-│   ├── render.py                 # auditable outputs
-│   ├── evaluation.py             # factual-safety evaluation
-│   └── cli.py
-├── examples/
-│   ├── fictional_profile.yaml
-│   ├── fictional_jd.md
-│   ├── retrieval_benchmark.yaml
-│   ├── retrieval_baseline_summary.json
-│   └── generated_demo/
-├── tests/
-├── docs/
-├── app.py
-└── .github/workflows/
-    ├── ci.yml
-    └── semantic-benchmark.yml
-```
-
-## CARR summary
-
-### Context
-
-Resume tailoring has two competing risks: unconstrained generation can fabricate relevance, while lexical matching can miss semantically equivalent experience.
-
-### Action
-
-I separated semantic retrieval from factual authorization. v0.2 introduces lexical, embedding, and hybrid retrievers with inspectable scores, while verified-source filtering, provenance, metric ownership, forbidden-claim rules, and final audit remain deterministic.
-
-### Results
-
-On the six-case fictional benchmark, embedding/hybrid retrieval improved Top-1 accuracy from **66.7% to 83.3%** and Recall@3 from **83.3% to 100%**, while preserving **100% explicit-gap accuracy**. Lightweight CI passes 10 automated tests, and the factual-safety suite remains 7/7.
-
-### Reflection
-
-Embedding similarity improves recall but does not prove factual equivalence. The next useful iteration is a larger labeled benchmark, threshold calibration, and an optional LLM reranker that can explain semantic equivalence while remaining downstream of the same evidence contract.
-
-Full case study: [`docs/CARR.md`](docs/CARR.md).
+| Decision | Why |
+| --- | --- |
+| Evidence registry is separate from generated text | Output cannot silently become a new source of truth. |
+| Similarity retrieval and factual authorization are separate | Relevance is not evidence. |
+| Requirement IDs are content-stable | JD edits do not destroy traceability. |
+| Coverage-first claim selection | A generic claim cannot crowd out evidence for a different JD requirement. |
+| Wording variants remain source-bound | Tailoring can change emphasis without inventing facts. |
+| Revision reconstructs from evidence | Guardrails can repair a sourced draft instead of only deleting it. |
+| Known unsupported scope is explicit | Strong semantic similarity cannot erase a verified gap. |
+| Baseline comparison is first-class | Real users edit existing resumes rather than regenerate identity from zero. |
+| Numbers use source-union ownership | Multi-claim bullets do not falsely reject a valid metric. |
+| Benchmark reports by category | A large aggregate score cannot hide a weak failure mode. |
 
 ## Limitations
 
-This is a portfolio-grade prototype, not a production recruiting platform. The public benchmark is small and fictional. Embedding similarity is not proof that two experiences are equivalent. The system does not rank candidates, infer protected attributes, or claim improvements in offer rate, ATS score, or commercial outcomes.
+This is a portfolio-grade prototype, not a recruiting platform. The benchmark is fictional and curated rather than independently authored, so the strong retrieval numbers should not be read as external validity. One hybrid Top-1 miss remains in the transferable-capability category, which is useful evidence that semantic relevance and exact evidence selection are different problems. `do_not_claim` is only as complete as the evidence profile; semantic similarity does not prove factual equivalence; the controlled generator uses pre-authorized wording variants rather than unconstrained LLM generation; Chinese lexical segmentation is deliberately lightweight; and the project does not rank candidates, infer protected attributes, calculate ATS scores, or claim improvements in offer rate.
 
 ## Roadmap
 
-- [x] Pluggable lexical / embedding / hybrid retrieval.
-- [x] Optional Sentence Transformers adapter.
-- [x] Inspectable candidate retrieval scores.
-- [x] Labeled requirement-to-claim benchmark command.
-- [x] Real embedding/hybrid integration benchmark in GitHub Actions.
-- [ ] Expand the semantic benchmark and calibrate retrieval thresholds.
-- [ ] Add optional LLM reranking/explanation behind the same evidence contract.
-- [ ] Add controlled paraphrasing that preserves source claim IDs.
+- [x] Structured JD parsing with stable IDs.
+- [x] Lexical / embedding / hybrid retrieval.
+- [x] Multilingual default embedding model.
+- [x] Evidence registry and claim-level provenance.
+- [x] Controlled JD-aware wording selection.
+- [x] Evidence-based revision loop.
+- [x] Baseline-to-application change log.
+- [x] 72-case benchmark with category-level evaluation.
+- [ ] Calibrate embedding/hybrid thresholds on a larger independent fixture.
+- [ ] Add an optional LLM generator behind the same evidence contract.
+- [ ] Add a second benchmark authored independently from the profile wording.
+- [ ] Add human review labels for semantic equivalence and revision quality.
 
 ## License
 

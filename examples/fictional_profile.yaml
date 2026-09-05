@@ -1,78 +1,266 @@
 meta:
-  schema_version: 1.0.0
+  schema_version: 0.3.0
   privacy: entirely_fictional
 candidate:
   name: An Lin
   location: Shanghai, China
 target_role_label: Medical AI Product Associate
+evidence:
+- id: evaluation_plan
+  type: document
+  description: Fictional clinical AI evaluation plan
+  status: verified
+- id: protocol_v1
+  type: document
+  description: Fictional workflow evaluation protocol
+  status: verified
+- id: evaluation_table
+  type: dataset
+  description: Fictional LLM response review table
+  status: verified
+- id: course_report
+  type: document
+  description: Fictional MVP course project report
+  status: verified
+- id: repository_commit
+  type: code
+  description: Fictional repository commit history
+  status: verified
+- id: test_report
+  type: test_report
+  description: Fictional automated test report
+  status: verified
+- id: presentation_archive
+  type: presentation
+  description: Fictional scientific presentation archive
+  status: verified
+- id: interview_notes
+  type: research_notes
+  description: Fictional clinician interview notes
+  status: verified
+- id: analysis_notebook
+  type: analysis
+  description: Fictional de-identified analysis notebook
+  status: verified
+- id: decision_log
+  type: project_log
+  description: Fictional cross-functional decision log
+  status: verified
+- id: training_materials
+  type: training
+  description: Fictional training deck and attendance sheet
+  status: verified
+- id: literature_matrix
+  type: literature
+  description: Fictional literature screening matrix
+  status: verified
+- id: config_history
+  type: code
+  description: Fictional configuration/version history
+  status: verified
+- id: project_tracker
+  type: project_log
+  description: Fictional milestone and risk tracker
+  status: verified
 entities:
-  - id: exp_medical_ai_lab
-    title: Medical AI Evaluation Research Assistant
-    organization: Example Clinical AI Laboratory
-    category: experience
-    claims:
-      - id: claim_workflow_eval
-        text: Defined model evaluation plans around clinical workflows and translated medical needs into testable product requirements.
-        status: verified
-        visible: true
-        evidence_refs: [protocol_v1, evaluation_plan]
-        tags: [clinical, evaluation, product, requirement, workflow]
-        do_not_claim: [production deployment]
-      - id: claim_llm_review_120
-        text: Reviewed 120 fictional medical-record responses from a language model for factual accuracy and hallucination risk.
-        status: verified
-        visible: true
-        evidence_refs: [evaluation_table]
-        tags: [llm, evaluation, hallucination, clinical safety]
-        metrics:
-          - id: metric_records_120
-            value: 120
-            unit: responses
-        do_not_claim: [commercial impact]
-      - id: claim_unverified_revenue
-        text: Improved commercial conversion through AI-assisted workflow optimization.
-        status: unverified
-        visible: true
-        evidence_refs: [draft_note]
-        tags: [business, product]
-        do_not_claim: []
-
-  - id: project_requirement_mapper
-    title: Clinical Requirement Mapping Prototype
-    organization: Example Course Project
-    category: project
-    claims:
-      - id: claim_mvp_mapping
-        text: Mapped a clinician user journey and defined an MVP requirement set for a simulated healthcare AI evaluation workflow.
-        status: verified
-        visible: true
-        evidence_refs: [course_report]
-        tags: [user journey, mvp, healthcare, ai, product]
-        do_not_claim: [shipped product]
-      - id: claim_python_pipeline
-        text: Built a Python workflow that converts structured evidence into traceable application-ready content and audit artifacts.
-        status: verified
-        visible: true
-        evidence_refs: [repository_commit, test_report]
-        tags: [python, automation, pipeline, evidence, provenance]
-        do_not_claim: [enterprise deployment]
-
-  - id: exp_scientific_communication
-    title: Biomedical Research Trainee
-    organization: Example Medical University
-    category: experience
-    claims:
-      - id: claim_scientific_communication
-        text: Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.
-        status: verified
-        visible: true
-        evidence_refs: [presentation_archive]
-        tags: [communication, evidence, literature, presentation]
-        do_not_claim: [KOL management]
-      - id: claim_private_draft
-        text: Drafted an internal experimental concept that is not approved for external use.
-        status: verified
-        visible: false
-        evidence_refs: [private_note]
-        tags: [research]
-        do_not_claim: []
+- id: exp_medical_ai_lab
+  title: Medical AI Evaluation Research Assistant
+  organization: Example Clinical AI Laboratory
+  category: experience
+  claims:
+  - id: claim_workflow_eval
+    text: Defined model evaluation plans around clinical workflows and translated medical needs into testable product requirements.
+    evidence_refs: [protocol_v1, evaluation_plan]
+    tags: [clinical, evaluation, product, requirement, workflow, user needs]
+    paraphrases:
+    - Translated clinical workflow needs into testable product requirements and evaluation plans.
+    - Converted medical user needs into concrete product requirements for model evaluation.
+    do_not_claim: [production deployment, owned product roadmap, commercial launch]
+  - id: claim_llm_review_120
+    text: Reviewed 120 fictional medical-record responses from a language model for factual accuracy and hallucination risk.
+    evidence_refs: [evaluation_table]
+    tags: [llm, evaluation, hallucination, clinical safety, quality]
+    metrics:
+    - {id: metric_records_120, value: 120, unit: responses}
+    paraphrases:
+    - Evaluated factual accuracy and hallucination risk across 120 fictional medical-record responses generated by a language model.
+    - Assessed 120 fictional LLM medical-record responses for factual errors and clinical-safety risks.
+    do_not_claim: [model training, production monitoring, regulatory validation]
+  - id: claim_clinician_interviews_8
+    text: Conducted 8 structured interviews with fictional clinicians to identify workflow pain points and prioritize user needs.
+    evidence_refs: [interview_notes]
+    tags: [clinician, user research, interview, pain point, prioritization, product]
+    metrics:
+    - {id: metric_interviews_8, value: 8, unit: interviews}
+    paraphrases:
+    - Interviewed 8 fictional clinicians to surface workflow pain points and prioritize product needs.
+    - Used 8 structured clinician interviews to identify user pain points and rank unmet needs.
+    do_not_claim: [KOL management, customer sales, market research ownership]
+  - id: claim_unverified_revenue
+    text: Improved commercial conversion through AI-assisted workflow optimization.
+    status: unverified
+    visible: true
+    evidence_refs: [evaluation_plan]
+    tags: [business, product]
+    do_not_claim: []
+- id: project_requirement_mapper
+  title: Clinical Requirement Mapping Prototype
+  organization: Example Course Project
+  category: project
+  claims:
+  - id: claim_mvp_mapping
+    text: Mapped a clinician user journey and defined an MVP requirement set for a simulated healthcare AI evaluation workflow.
+    evidence_refs: [course_report]
+    tags: [user journey, mvp, healthcare, ai, product, requirement]
+    paraphrases:
+    - Turned a clinician user journey into an MVP requirement set for a simulated healthcare AI evaluation workflow.
+    - Defined MVP scope from a mapped clinician journey for a simulated medical AI workflow.
+    do_not_claim: [shipped product, commercial launch, owned roadmap]
+  - id: claim_project_planning
+    text: Maintained milestones, risks, and scope changes for a time-boxed prototype project and documented trade-off decisions.
+    evidence_refs: [project_tracker]
+    tags: [project, milestone, risk, scope, trade-off, planning, delivery]
+    paraphrases:
+    - Tracked prototype milestones, risks, scope changes, and trade-off decisions through delivery.
+    - Managed a project tracker covering milestones, risks, scope changes, and documented trade-offs.
+    do_not_claim: [program director, budget ownership, people management]
+- id: project_traceable_pipeline
+  title: Traceable Application Content Pipeline
+  organization: Example Engineering Project
+  category: project
+  claims:
+  - id: claim_python_pipeline
+    text: Built a Python workflow that converts structured evidence into traceable application-ready content and audit artifacts.
+    evidence_refs: [repository_commit, test_report]
+    tags: [python, automation, pipeline, evidence, provenance, audit, workflow]
+    paraphrases:
+    - Built a traceable Python pipeline that transforms structured evidence into application-ready content and audit artifacts.
+    - Automated evidence-to-content transformation in Python while preserving provenance and audit outputs.
+    do_not_claim: [enterprise deployment, cloud platform ownership, production SLA]
+  - id: claim_reproducibility
+    text: Added versioned configuration, deterministic tests, and decision logs so repeated workflow runs could be reproduced and audited.
+    evidence_refs: [config_history, test_report, decision_log]
+    tags: [reproducibility, versioning, testing, traceability, audit, configuration]
+    paraphrases:
+    - Improved workflow reproducibility with versioned configuration, deterministic tests, and auditable decision logs.
+    - Made repeated pipeline runs reproducible through configuration versioning, deterministic tests, and trace logs.
+    do_not_claim: [regulated validation, ISO certification, production quality system]
+- id: exp_scientific_communication
+  title: Biomedical Research Trainee
+  organization: Example Medical University
+  category: experience
+  claims:
+  - id: claim_scientific_communication
+    text: Synthesized biomedical literature into structured presentations and concise evidence summaries for research discussions.
+    evidence_refs: [presentation_archive, literature_matrix]
+    tags: [communication, evidence, literature, presentation, scientific writing]
+    paraphrases:
+    - Translated complex biomedical evidence into structured presentations and concise summaries for research discussions.
+    - Communicated scientific evidence through clear presentations and concise literature summaries.
+    do_not_claim: [KOL management, medical affairs ownership, external advisory board]
+  - id: claim_literature_review_65
+    text: Screened 65 fictional biomedical papers and organized findings into a structured evidence matrix for a research question.
+    evidence_refs: [literature_matrix]
+    tags: [literature, research, evidence, screening, synthesis]
+    metrics:
+    - {id: metric_papers_65, value: 65, unit: papers}
+    paraphrases:
+    - Reviewed 65 fictional biomedical papers and structured the findings in an evidence matrix.
+    - Built a structured research evidence matrix after screening 65 fictional biomedical papers.
+    do_not_claim: [systematic review publication, guideline authorship, regulatory submission]
+  - id: claim_private_draft
+    text: Drafted an internal experimental concept that is not approved for external use.
+    status: verified
+    visible: false
+    evidence_refs: [presentation_archive]
+    tags: [research]
+    do_not_claim: []
+- id: exp_data_insights
+  title: Clinical Data Analysis Intern
+  organization: Example Health Analytics Team
+  category: experience
+  claims:
+  - id: claim_data_analysis_4800
+    text: Cleaned and analyzed 4,800 fictional de-identified records to identify usage patterns and summarize actionable findings.
+    evidence_refs: [analysis_notebook]
+    tags: [data, analysis, cleaning, insight, pattern, healthcare]
+    metrics:
+    - {id: metric_records_4800, value: 4800, unit: records}
+    paraphrases:
+    - Analyzed 4,800 fictional de-identified records to surface usage patterns and actionable insights.
+    - Cleaned 4,800 fictional records and translated usage patterns into concise findings.
+    do_not_claim: [predictive model deployment, causal inference, SQL database ownership]
+  - id: claim_cross_functional
+    text: Coordinated clinical, engineering, and design teammates around shared requirements, decision logs, and handoff issues.
+    evidence_refs: [decision_log, project_tracker]
+    tags: [cross-functional, stakeholder, communication, engineering, design, clinical, coordination]
+    paraphrases:
+    - Aligned clinical, engineering, and design teammates on requirements, decisions, and handoffs.
+    - Facilitated cross-functional coordination across clinical, engineering, and design workstreams.
+    do_not_claim: [direct reports, people management, executive leadership]
+- id: exp_enablement
+  title: Product Enablement Assistant
+  organization: Example Digital Health Team
+  category: experience
+  claims:
+  - id: claim_training_4_25
+    text: Created training materials and delivered 4 fictional product-learning sessions for 25 internal participants.
+    evidence_refs: [training_materials]
+    tags: [training, enablement, communication, presentation, product]
+    metrics:
+    - {id: metric_sessions_4, value: 4, unit: sessions}
+    - {id: metric_participants_25, value: 25, unit: participants}
+    paraphrases:
+    - Delivered 4 fictional product-training sessions to 25 internal participants using structured learning materials.
+    - Created product enablement materials and trained 25 internal participants across 4 fictional sessions.
+    do_not_claim: [sales training ownership, external customer certification, revenue enablement]
+do_not_claim:
+- production deployment
+- 生产部署
+- uptime SLA
+- 线上 SLA
+- commercial revenue
+- sales revenue
+- revenue targets
+- 销售收入
+- 商业转化率
+- commercial contracts
+- 商业合同
+- P&L
+- operating budget
+- 年度预算
+- 利润目标
+- FDA
+- NMPA
+- regulatory submission
+- 注册申报
+- 监管机构
+- KOL management
+- KOL 管理
+- advisory board
+- 专家顾问委员会
+- fine-tune a foundation model
+- foundation model on GPUs
+- 训练并微调大语言模型
+- GPU 训练基础设施
+- customer sales training
+- 客户销售培训
+- predictive model deployment
+- 上线预测模型
+- causal business impact
+- 因果影响
+- people management
+- performance-manage
+- direct reports
+- 绩效管理
+- 人员管理
+- program director
+- executive authority
+- 项目总监
+- 高管级决策权
+- CRA
+- clinical site monitoring
+- 临床试验中心监查
+- ISO-certified production quality
+- ISO 认证
+- 生产质量管理体系

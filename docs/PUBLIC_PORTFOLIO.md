@@ -1,21 +1,17 @@
 # Public Portfolio Notes
 
-This repository is intentionally scoped as a public, reproducible showcase of an evidence-grounded resume tailoring agent.
+## One-sentence description
 
-## What is included
+An evidence-grounded resume tailoring agent that maps JD requirements to verified evidence, performs constrained rewriting with claim-level provenance, repairs unsafe sourced drafts, and evaluates retrieval/safety on a 72-case fictional benchmark.
 
-- agent architecture and design decisions;
-- a fully fictional candidate profile and job description;
-- reproducible CLI and Streamlit demos;
-- deterministic factual guardrails and audit/revision behavior;
-- synthetic evaluation and automated tests;
-- CARR case study, architecture, evaluation, and privacy/safety documentation.
+## What to demo in an interview
 
-## What is intentionally excluded
+1. Run the lexical baseline with a fictional baseline resume.
+2. Show a supported requirement and an explicit commercial gap in `jd_analysis.yaml`.
+3. Compare baseline vs tailored wording in `change_log.json`.
+4. Run `--simulate-unsafe-draft` and show rewrite-based revision in `run_trace.json`.
+5. Show the benchmark categories and explain why retrieval and factual authorization are evaluated separately.
 
-- real resumes, contact details, application histories, or job descriptions;
-- private career evidence or unpublished personal records;
-- recruiter-specific interview scripts or private application notes;
-- claims about production deployment, hiring outcomes, or commercial impact that were not evaluated.
+## What not to claim
 
-The public project demonstrates the product and engineering decisions without exposing the private source system from which the design principles were abstracted.
+No hiring-outcome uplift, ATS-score improvement, production recruiting deployment, or claim that embedding similarity proves factual equivalence.

@@ -1,36 +1,461 @@
 meta:
-  version: 0.2.0
+  version: 0.3.0
   privacy: entirely_fictional
-  purpose: labeled requirement-to-claim retrieval benchmark
+  purpose: 72-case labeled requirement-to-claim retrieval benchmark
 cases:
-  - id: semantic_communication
-    requirement: Explain complex technical findings clearly to non-specialist audiences.
-    expected_claim_ids:
-      - claim_scientific_communication
-
-  - id: semantic_product_translation
-    requirement: Turn clinician pain points into concrete, testable feature specifications.
-    expected_claim_ids:
-      - claim_workflow_eval
-      - claim_mvp_mapping
-
-  - id: semantic_llm_safety
-    requirement: Inspect model-generated clinical content for unsupported or misleading statements.
-    expected_claim_ids:
-      - claim_llm_review_120
-
-  - id: semantic_traceability
-    requirement: Build an auditable automation flow that preserves the origin of generated application content.
-    expected_claim_ids:
-      - claim_python_pipeline
-
-  - id: lexical_overlap_control
-    requirement: Define product requirements and model evaluation plans for a healthcare AI workflow.
-    expected_claim_ids:
-      - claim_workflow_eval
-      - claim_mvp_mapping
-
-  - id: explicit_gap_control
-    requirement: Own enterprise sales revenue targets and negotiate commercial contracts.
-    expect_gap: true
-    expected_claim_ids: []
+- id: case_001
+  category: lexical_control
+  language: en
+  requirement: Translate clinical workflow needs into testable product requirements and evaluation plans.
+  expected_claim_ids: [claim_workflow_eval]
+  expect_gap: false
+- id: case_002
+  category: semantic_transfer
+  language: en
+  requirement: Turn ambiguous medical user problems into concrete specifications that a product team can validate.
+  expected_claim_ids: [claim_workflow_eval]
+  expect_gap: false
+- id: case_003
+  category: bilingual_zh
+  language: zh
+  requirement: 将临床工作流中的用户需求转化为可测试的产品需求，并设计评估方案。
+  expected_claim_ids: [claim_workflow_eval]
+  expect_gap: false
+- id: case_004
+  category: transferable_capability
+  language: en
+  requirement: Convert healthcare pain points into requirements that can be evaluated rather than leaving them as vague requests.
+  expected_claim_ids: [claim_workflow_eval]
+  expect_gap: false
+- id: case_005
+  category: lexical_control
+  language: en
+  requirement: Evaluate LLM outputs for hallucination, factual accuracy, and clinical-safety risk.
+  expected_claim_ids: [claim_llm_review_120]
+  expect_gap: false
+- id: case_006
+  category: semantic_transfer
+  language: en
+  requirement: Inspect generated medical content for unsupported or misleading statements before it is trusted.
+  expected_claim_ids: [claim_llm_review_120]
+  expect_gap: false
+- id: case_007
+  category: bilingual_zh
+  language: zh
+  requirement: 评估大模型生成医疗内容的幻觉、事实准确性和临床安全风险。
+  expected_claim_ids: [claim_llm_review_120]
+  expect_gap: false
+- id: case_008
+  category: numeric_provenance
+  language: en
+  requirement: Review 120 language-model medical responses for factual errors and hallucination risk.
+  expected_claim_ids: [claim_llm_review_120]
+  expect_gap: false
+- id: case_009
+  category: lexical_control
+  language: en
+  requirement: Conduct clinician interviews to identify workflow pain points and prioritize user needs.
+  expected_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: false
+- id: case_010
+  category: semantic_transfer
+  language: en
+  requirement: Discover what frustrates healthcare users and rank the problems worth solving through structured conversations.
+  expected_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: false
+- id: case_011
+  category: bilingual_zh
+  language: zh
+  requirement: 通过医生访谈识别临床工作流痛点，并对用户需求进行优先级排序。
+  expected_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: false
+- id: case_012
+  category: numeric_provenance
+  language: en
+  requirement: Use 8 structured clinician interviews to surface and prioritize unmet workflow needs.
+  expected_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: false
+- id: case_013
+  category: lexical_control
+  language: en
+  requirement: Map a clinician user journey and define MVP requirements for a healthcare AI workflow.
+  expected_claim_ids: [claim_mvp_mapping]
+  expect_gap: false
+- id: case_014
+  category: semantic_transfer
+  language: en
+  requirement: Reduce a broad medical AI concept into the smallest testable scope based on how clinicians actually move through the task.
+  expected_claim_ids: [claim_mvp_mapping]
+  expect_gap: false
+- id: case_015
+  category: bilingual_zh
+  language: zh
+  requirement: 根据临床用户旅程定义医疗 AI 产品的 MVP 范围和产品需求。
+  expected_claim_ids: [claim_mvp_mapping]
+  expect_gap: false
+- id: case_016
+  category: transferable_capability
+  language: en
+  requirement: Translate an end-to-end clinician journey into a focused first-version feature set.
+  expected_claim_ids: [claim_mvp_mapping]
+  expect_gap: false
+- id: case_017
+  category: lexical_control
+  language: en
+  requirement: Track project milestones, risks, scope changes, and delivery trade-offs.
+  expected_claim_ids: [claim_project_planning]
+  expect_gap: false
+- id: case_018
+  category: semantic_transfer
+  language: en
+  requirement: Keep a time-boxed prototype on course by making schedule, risk, scope, and compromise decisions visible.
+  expected_claim_ids: [claim_project_planning]
+  expect_gap: false
+- id: case_019
+  category: bilingual_zh
+  language: zh
+  requirement: 管理原型项目的里程碑、风险、范围变化和取舍决策。
+  expected_claim_ids: [claim_project_planning]
+  expect_gap: false
+- id: case_020
+  category: transferable_capability
+  language: en
+  requirement: Maintain delivery discipline when priorities change by documenting risks and scope trade-offs.
+  expected_claim_ids: [claim_project_planning]
+  expect_gap: false
+- id: case_021
+  category: lexical_control
+  language: en
+  requirement: Build a Python automation workflow with provenance and audit artifacts.
+  expected_claim_ids: [claim_python_pipeline]
+  expect_gap: false
+- id: case_022
+  category: semantic_transfer
+  language: en
+  requirement: Automate the path from structured source material to application-ready output without losing where each statement came from.
+  expected_claim_ids: [claim_python_pipeline]
+  expect_gap: false
+- id: case_023
+  category: bilingual_zh
+  language: zh
+  requirement: 使用 Python 搭建自动化工作流，在生成内容时保留证据来源和审计记录。
+  expected_claim_ids: [claim_python_pipeline]
+  expect_gap: false
+- id: case_024
+  category: transferable_capability
+  language: en
+  requirement: Create traceable automation that preserves the origin of generated content.
+  expected_claim_ids: [claim_python_pipeline]
+  expect_gap: false
+- id: case_025
+  category: lexical_control
+  language: en
+  requirement: Use versioned configuration, deterministic testing, and audit logs to improve reproducibility.
+  expected_claim_ids: [claim_reproducibility]
+  expect_gap: false
+- id: case_026
+  category: semantic_transfer
+  language: en
+  requirement: Make repeated workflow runs produce explainable, repeatable results even after settings change.
+  expected_claim_ids: [claim_reproducibility]
+  expect_gap: false
+- id: case_027
+  category: bilingual_zh
+  language: zh
+  requirement: 通过版本管理、确定性测试和审计日志提高工作流的可复现性。
+  expected_claim_ids: [claim_reproducibility]
+  expect_gap: false
+- id: case_028
+  category: transferable_capability
+  language: en
+  requirement: Ensure a pipeline can be rerun and its decisions reconstructed later.
+  expected_claim_ids: [claim_reproducibility]
+  expect_gap: false
+- id: case_029
+  category: lexical_control
+  language: en
+  requirement: Communicate scientific evidence through concise presentations and literature summaries.
+  expected_claim_ids: [claim_scientific_communication]
+  expect_gap: false
+- id: case_030
+  category: semantic_transfer
+  language: en
+  requirement: Explain complex biomedical findings clearly to people who were not involved in the research.
+  expected_claim_ids: [claim_scientific_communication]
+  expect_gap: false
+- id: case_031
+  category: bilingual_zh
+  language: zh
+  requirement: 将复杂的生物医学证据整理成清晰的汇报和简洁总结，便于跨团队沟通。
+  expected_claim_ids: [claim_scientific_communication]
+  expect_gap: false
+- id: case_032
+  category: transferable_capability
+  language: en
+  requirement: Turn dense research material into structured, decision-friendly communication.
+  expected_claim_ids: [claim_scientific_communication]
+  expect_gap: false
+- id: case_033
+  category: lexical_control
+  language: en
+  requirement: Screen biomedical literature and organize evidence in a structured research matrix.
+  expected_claim_ids: [claim_literature_review_65]
+  expect_gap: false
+- id: case_034
+  category: semantic_transfer
+  language: en
+  requirement: Systematically sort a body of research so the team can compare findings against one question.
+  expected_claim_ids: [claim_literature_review_65]
+  expect_gap: false
+- id: case_035
+  category: bilingual_zh
+  language: zh
+  requirement: 筛选科研文献，并将证据整理为结构化矩阵以支持研究问题。
+  expected_claim_ids: [claim_literature_review_65]
+  expect_gap: false
+- id: case_036
+  category: numeric_provenance
+  language: en
+  requirement: Review and structure findings from 65 biomedical papers.
+  expected_claim_ids: [claim_literature_review_65]
+  expect_gap: false
+- id: case_037
+  category: lexical_control
+  language: en
+  requirement: Analyze de-identified healthcare data to identify patterns and actionable insights.
+  expected_claim_ids: [claim_data_analysis_4800]
+  expect_gap: false
+- id: case_038
+  category: semantic_transfer
+  language: en
+  requirement: Turn a messy set of usage records into a clear explanation of what users are actually doing.
+  expected_claim_ids: [claim_data_analysis_4800]
+  expect_gap: false
+- id: case_039
+  category: bilingual_zh
+  language: zh
+  requirement: 清洗并分析医疗数据，识别使用模式并提炼可行动的洞察。
+  expected_claim_ids: [claim_data_analysis_4800]
+  expect_gap: false
+- id: case_040
+  category: numeric_provenance
+  language: en
+  requirement: Analyze 4,800 de-identified records to surface usage patterns.
+  expected_claim_ids: [claim_data_analysis_4800]
+  expect_gap: false
+- id: case_041
+  category: lexical_control
+  language: en
+  requirement: Coordinate clinical, engineering, and design stakeholders around shared requirements and handoffs.
+  expected_claim_ids: [claim_cross_functional]
+  expect_gap: false
+- id: case_042
+  category: semantic_transfer
+  language: en
+  requirement: Keep people from different disciplines aligned when work moves between medical, technical, and design teams.
+  expected_claim_ids: [claim_cross_functional]
+  expect_gap: false
+- id: case_043
+  category: bilingual_zh
+  language: zh
+  requirement: 协调临床、工程和设计跨团队成员，对齐需求、决策和交接事项。
+  expected_claim_ids: [claim_cross_functional]
+  expect_gap: false
+- id: case_044
+  category: transferable_capability
+  language: en
+  requirement: Resolve cross-functional handoff ambiguity by maintaining shared decisions and requirements.
+  expected_claim_ids: [claim_cross_functional]
+  expect_gap: false
+- id: case_045
+  category: lexical_control
+  language: en
+  requirement: Create product training materials and deliver internal enablement sessions.
+  expected_claim_ids: [claim_training_4_25]
+  expect_gap: false
+- id: case_046
+  category: semantic_transfer
+  language: en
+  requirement: Help internal users understand a product through structured learning materials and live teaching.
+  expected_claim_ids: [claim_training_4_25]
+  expect_gap: false
+- id: case_047
+  category: bilingual_zh
+  language: zh
+  requirement: 制作产品培训材料，并向内部人员开展产品学习和沟通。
+  expected_claim_ids: [claim_training_4_25]
+  expect_gap: false
+- id: case_048
+  category: numeric_provenance
+  language: en
+  requirement: Deliver 4 product-learning sessions for 25 internal participants.
+  expected_claim_ids: [claim_training_4_25]
+  expect_gap: false
+- id: case_049
+  category: explicit_gap
+  language: en
+  requirement: Own enterprise sales revenue targets and negotiate commercial contracts.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_workflow_eval]
+  expect_gap: true
+- id: case_050
+  category: explicit_gap
+  language: zh
+  requirement: 负责企业销售收入目标，并独立谈判商业合同。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_workflow_eval]
+  expect_gap: true
+- id: case_051
+  category: explicit_gap
+  language: en
+  requirement: Lead production deployment of a regulated AI system with uptime SLAs.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_python_pipeline]
+  expect_gap: true
+- id: case_052
+  category: explicit_gap
+  language: zh
+  requirement: 负责受监管 AI 系统的生产部署和线上 SLA。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_python_pipeline]
+  expect_gap: true
+- id: case_053
+  category: explicit_gap
+  language: en
+  requirement: Prepare and submit FDA or NMPA regulatory dossiers.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_scientific_communication]
+  expect_gap: true
+- id: case_054
+  category: explicit_gap
+  language: zh
+  requirement: 独立完成 FDA 或 NMPA 注册申报材料并与监管机构沟通。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_scientific_communication]
+  expect_gap: true
+- id: case_055
+  category: explicit_gap
+  language: en
+  requirement: Own a product P&L and annual operating budget.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_project_planning]
+  expect_gap: true
+- id: case_056
+  category: explicit_gap
+  language: zh
+  requirement: 负责产品 P&L、年度预算和利润目标。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_project_planning]
+  expect_gap: true
+- id: case_057
+  category: overclaim_trap
+  language: en
+  requirement: Manage KOL relationships and run external advisory boards.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_scientific_communication, claim_clinician_interviews_8]
+  expect_gap: true
+- id: case_058
+  category: overclaim_trap
+  language: zh
+  requirement: 负责 KOL 管理和外部专家顾问委员会。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_scientific_communication, claim_clinician_interviews_8]
+  expect_gap: true
+- id: case_059
+  category: overclaim_trap
+  language: en
+  requirement: Train and fine-tune a foundation model on GPUs from scratch.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_llm_review_120]
+  expect_gap: true
+- id: case_060
+  category: overclaim_trap
+  language: zh
+  requirement: 从零训练并微调大语言模型，负责 GPU 训练基础设施。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_llm_review_120]
+  expect_gap: true
+- id: case_061
+  category: overclaim_trap
+  language: en
+  requirement: Own customer sales training and directly improve revenue conversion.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_training_4_25]
+  expect_gap: true
+- id: case_062
+  category: overclaim_trap
+  language: zh
+  requirement: 负责客户销售培训，并直接提升商业转化率。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_training_4_25]
+  expect_gap: true
+- id: case_063
+  category: overclaim_trap
+  language: en
+  requirement: Deploy predictive models and prove causal business impact from 4,800 records.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_data_analysis_4800]
+  expect_gap: true
+- id: case_064
+  category: overclaim_trap
+  language: zh
+  requirement: 基于 4,800 条数据上线预测模型，并证明对业务结果的因果影响。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_data_analysis_4800]
+  expect_gap: true
+- id: case_065
+  category: seniority_hard_negative
+  language: en
+  requirement: Hire, performance-manage, and lead a team of product managers.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_cross_functional]
+  expect_gap: true
+- id: case_066
+  category: seniority_hard_negative
+  language: zh
+  requirement: 招聘并绩效管理产品经理团队，承担直接人员管理责任。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_cross_functional]
+  expect_gap: true
+- id: case_067
+  category: seniority_hard_negative
+  language: en
+  requirement: Serve as program director with executive authority over multiple workstreams.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_project_planning]
+  expect_gap: true
+- id: case_068
+  category: seniority_hard_negative
+  language: zh
+  requirement: 作为项目总监对多个工作流拥有高管级决策权。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_project_planning]
+  expect_gap: true
+- id: case_069
+  category: seniority_hard_negative
+  language: en
+  requirement: Act as CRA and perform independent clinical site monitoring visits.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: true
+- id: case_070
+  category: seniority_hard_negative
+  language: zh
+  requirement: 担任 CRA，独立开展临床试验中心监查访视。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_clinician_interviews_8]
+  expect_gap: true
+- id: case_071
+  category: seniority_hard_negative
+  language: en
+  requirement: Own an ISO-certified production quality management system.
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_reproducibility]
+  expect_gap: true
+- id: case_072
+  category: seniority_hard_negative
+  language: zh
+  requirement: 负责通过 ISO 认证的生产质量管理体系并承担体系负责人职责。
+  expected_claim_ids: []
+  forbidden_claim_ids: [claim_reproducibility]
+  expect_gap: true
