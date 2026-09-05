@@ -40,12 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
     run = subparsers.add_parser("run", help="Run the agent on a profile and JD")
     run.add_argument("--profile", required=True)
     run.add_argument("--jd", required=True)
+    run.add_argument("--baseline")
     run.add_argument("--output", default="outputs/demo")
     _add_retrieval_args(run)
     run.add_argument(
         "--simulate-unsafe-draft",
         action="store_true",
-        help="Inject one unsupported draft bullet to demonstrate the audit/revision loop.",
+        help="Inject an unsupported rewrite into a sourced bullet to demonstrate evidence-based repair.",
     )
 
     evaluate = subparsers.add_parser("evaluate", help="Run synthetic guardrail evaluation")
@@ -74,6 +75,7 @@ def main() -> int:
             args.jd,
             args.output,
             simulate_unsafe_draft=args.simulate_unsafe_draft,
+            baseline_path=args.baseline,
         )
         print(json.dumps({"status": result["status"], "audit": result["audit"]}, indent=2))
         return 0 if result["status"] == "passed" else 1
