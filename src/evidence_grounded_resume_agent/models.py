@@ -5,6 +5,14 @@ from typing import Any
 
 
 @dataclass(frozen=True)
+class EvidenceRecord:
+    id: str
+    type: str
+    description: str = ""
+    status: str = "verified"
+
+
+@dataclass(frozen=True)
 class Claim:
     id: str
     text: str
@@ -14,6 +22,7 @@ class Claim:
     visible: bool = True
     do_not_claim: tuple[str, ...] = ()
     metrics: tuple[dict[str, Any], ...] = ()
+    paraphrases: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -30,6 +39,9 @@ class Requirement:
     id: str
     text: str
     tokens: tuple[str, ...]
+    kind: str = "responsibility"
+    priority: str = "high"
+    section: str = ""
 
 
 @dataclass
@@ -42,6 +54,9 @@ class Match:
     retrieval_mode: str = "lexical"
     top_score: float = 0.0
     candidate_scores: list[dict[str, Any]] = field(default_factory=list)
+    requirement_kind: str = "responsibility"
+    requirement_priority: str = "high"
+    authorization_note: str | None = None
 
 
 @dataclass
@@ -50,6 +65,9 @@ class DraftBullet:
     source_claim_ids: list[str]
     requirement_ids: list[str]
     metric_ids: list[str]
+    original_text: str | None = None
+    change_reason: str | None = None
+    revision_notes: list[str] = field(default_factory=list)
 
 
 @dataclass
