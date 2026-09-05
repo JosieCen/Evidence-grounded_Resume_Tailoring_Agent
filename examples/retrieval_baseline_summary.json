@@ -2,7 +2,9 @@
   "meta": {
     "benchmark": "examples/retrieval_benchmark.yaml",
     "fixture_version": "0.3.0",
-    "note": "Embedding/hybrid values are refreshed from the GitHub Actions semantic benchmark."
+    "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "source": "GitHub Actions semantic benchmark run 33953987877",
+    "note": "Fictional retrieval fixture; metrics are not ATS scores or hiring outcomes."
   },
   "retrievers": {
     "lexical": {
@@ -16,7 +18,34 @@
       "forbidden_top1_rate": 0.0,
       "overall_case_accuracy": 0.8888888888888888
     },
-    "embedding": null,
-    "hybrid": null
+    "embedding": {
+      "cases": 72,
+      "positive_cases": 48,
+      "gap_cases": 24,
+      "top1_accuracy": 0.9375,
+      "recall_at_3": 1.0,
+      "gap_accuracy": 1.0,
+      "false_positive_rate_on_gaps": 0.0,
+      "forbidden_top1_rate": 0.0,
+      "overall_case_accuracy": 0.9583333333333334
+    },
+    "hybrid": {
+      "cases": 72,
+      "positive_cases": 48,
+      "gap_cases": 24,
+      "top1_accuracy": 0.9791666666666666,
+      "recall_at_3": 1.0,
+      "gap_accuracy": 1.0,
+      "false_positive_rate_on_gaps": 0.0,
+      "forbidden_top1_rate": 0.0,
+      "overall_case_accuracy": 0.9861111111111112,
+      "remaining_top1_miss": {
+        "case_id": "case_004",
+        "category": "transferable_capability",
+        "expected_claim_id": "claim_workflow_eval",
+        "observed_top1_claim_id": "claim_clinician_interviews_8",
+        "expected_claim_rank": 2
+      }
+    }
   }
 }
