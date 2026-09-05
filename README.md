@@ -56,15 +56,17 @@ Semantic similarity can **propose** evidence. It cannot override `verified`, `vi
 
 The public fixture contains **72 labeled cases**: **48 supported requirements**, **24 explicit gaps / hard negatives**, and **24 Chinese-language cases**. It covers 12 lexical controls, 12 semantic-transfer cases, 12 bilingual Chinese cases, 7 transferable-capability cases, 5 numeric-provenance cases, 8 explicit gaps, 8 overclaim traps, and 8 seniority hard negatives.
 
-The lexical baseline on the committed v0.3 fixture is:
+The v0.3 benchmark was executed in GitHub Actions with the real multilingual Sentence Transformers model (`paraphrase-multilingual-MiniLM-L12-v2`):
 
 | Retriever | Positive Top-1 | Recall@3 | Gap accuracy | Overall case accuracy |
 | --- | ---: | ---: | ---: | ---: |
 | Lexical | **83.3%** | **100%** | **100%** | **88.9%** |
-| Embedding | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions |
-| Hybrid | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions | Generated in GitHub Actions |
+| Embedding | **93.8%** | **100%** | **100%** | **95.8%** |
+| Hybrid | **97.9%** | **100%** | **100%** | **98.6%** |
 
-The Semantic Retrieval Benchmark workflow runs the multilingual embedding and hybrid variants with a real Sentence Transformers model and uploads machine-readable reports. `examples/retrieval_baseline_summary.json` stores the committed baseline summary. These are retrieval/safety fixture metrics, **not ATS scores or hiring outcomes**.
+All three retrievers kept the false-positive rate on the 24 gap/hard-negative cases at **0%** and the forbidden-Top-1 rate at **0%**. Hybrid reached 100% Top-1 on the bilingual and semantic-transfer groups; its only Top-1 miss was a deliberately ambiguous transferable-capability case where clinician interviews ranked just above the workflow-evaluation claim, while the expected claim still appeared at rank 2. I keep that miss visible rather than tuning the fixture to force a perfect score.
+
+The Semantic Retrieval Benchmark workflow publishes machine-readable lexical, embedding, hybrid, and aggregate reports. `examples/retrieval_baseline_summary.json` stores the committed aggregate summary. These are retrieval/safety fixture metrics, **not ATS scores or hiring outcomes**.
 
 ## Benchmark categories
 
@@ -163,7 +165,7 @@ Install `.[ui]` and run `streamlit run app.py`; for embedding/hybrid use `.[ui,e
 
 ## Limitations
 
-This is a portfolio-grade prototype, not a recruiting platform. The benchmark is fictional and curated; `do_not_claim` is only as complete as the evidence profile; semantic similarity does not prove factual equivalence; the controlled generator uses pre-authorized wording variants rather than unconstrained LLM generation; Chinese lexical segmentation is deliberately lightweight; and the project does not rank candidates, infer protected attributes, calculate ATS scores, or claim improvements in offer rate.
+This is a portfolio-grade prototype, not a recruiting platform. The benchmark is fictional and curated rather than independently authored, so the strong retrieval numbers should not be read as external validity. One hybrid Top-1 miss remains in the transferable-capability category, which is useful evidence that semantic relevance and exact evidence selection are different problems. `do_not_claim` is only as complete as the evidence profile; semantic similarity does not prove factual equivalence; the controlled generator uses pre-authorized wording variants rather than unconstrained LLM generation; Chinese lexical segmentation is deliberately lightweight; and the project does not rank candidates, infer protected attributes, calculate ATS scores, or claim improvements in offer rate.
 
 ## Roadmap
 
