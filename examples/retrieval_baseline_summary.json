@@ -1,39 +1,51 @@
 {
-  "version": "0.2.0",
-  "benchmark": "examples/retrieval_benchmark.yaml",
-  "cases": 6,
-  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
-  "results": {
+  "meta": {
+    "benchmark": "examples/retrieval_benchmark.yaml",
+    "fixture_version": "0.3.0",
+    "model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "source": "GitHub Actions semantic benchmark run 33953987877",
+    "note": "Fictional retrieval fixture; metrics are not ATS scores or hiring outcomes."
+  },
+  "retrievers": {
     "lexical": {
-      "top1_accuracy": 0.6666666667,
-      "recall_at_3": 0.8333333333,
-      "gap_accuracy": 1.0
+      "cases": 72,
+      "positive_cases": 48,
+      "gap_cases": 24,
+      "top1_accuracy": 0.8333333333333334,
+      "recall_at_3": 1.0,
+      "gap_accuracy": 1.0,
+      "false_positive_rate_on_gaps": 0.0,
+      "forbidden_top1_rate": 0.0,
+      "overall_case_accuracy": 0.8888888888888888
     },
     "embedding": {
-      "top1_accuracy": 0.8333333333,
+      "cases": 72,
+      "positive_cases": 48,
+      "gap_cases": 24,
+      "top1_accuracy": 0.9375,
       "recall_at_3": 1.0,
-      "gap_accuracy": 1.0
+      "gap_accuracy": 1.0,
+      "false_positive_rate_on_gaps": 0.0,
+      "forbidden_top1_rate": 0.0,
+      "overall_case_accuracy": 0.9583333333333334
     },
     "hybrid": {
-      "top1_accuracy": 0.8333333333,
+      "cases": 72,
+      "positive_cases": 48,
+      "gap_cases": 24,
+      "top1_accuracy": 0.9791666666666666,
       "recall_at_3": 1.0,
-      "gap_accuracy": 1.0
+      "gap_accuracy": 1.0,
+      "false_positive_rate_on_gaps": 0.0,
+      "forbidden_top1_rate": 0.0,
+      "overall_case_accuracy": 0.9861111111111112,
+      "remaining_top1_miss": {
+        "case_id": "case_004",
+        "category": "transferable_capability",
+        "expected_claim_id": "claim_workflow_eval",
+        "observed_top1_claim_id": "claim_clinician_interviews_8",
+        "expected_claim_rank": 2
+      }
     }
-  },
-  "notable_case": {
-    "id": "semantic_communication",
-    "requirement": "Explain complex technical findings clearly to non-specialist audiences.",
-    "lexical": "GAP",
-    "embedding": {
-      "match_level": "PARTIAL_MATCH",
-      "top_claim_id": "claim_scientific_communication",
-      "top_score": 0.3414
-    },
-    "hybrid": {
-      "match_level": "PARTIAL_MATCH",
-      "top_claim_id": "claim_scientific_communication",
-      "top_score": 0.2219
-    }
-  },
-  "note": "All data and benchmark cases are fictional. These values measure retrieval behavior on a small portfolio benchmark, not hiring outcomes."
+  }
 }

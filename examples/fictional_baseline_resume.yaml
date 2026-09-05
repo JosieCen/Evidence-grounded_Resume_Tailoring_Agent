@@ -1,0 +1,67 @@
+meta:
+  schema_version: 0.3.0
+  privacy: entirely_fictional
+candidate:
+  name: An Lin
+target_role: General Healthcare AI
+entries:
+- entity_id: exp_medical_ai_lab
+  title: Medical AI Evaluation Research Assistant
+  organization: Example Clinical AI Laboratory
+  bullets:
+  - id: baseline_claim_workflow_eval
+    text: Defined model evaluation plans around clinical workflows and translated
+      medical needs into testable product requirements.
+    source_claim_ids:
+    - claim_workflow_eval
+  - id: baseline_claim_llm_review_120
+    text: Reviewed 120 fictional medical-record responses from a language model for
+      factual accuracy and hallucination risk.
+    source_claim_ids:
+    - claim_llm_review_120
+- entity_id: project_requirement_mapper
+  title: Clinical Requirement Mapping Prototype
+  organization: Example Course Project
+  bullets:
+  - id: baseline_claim_mvp_mapping
+    text: Mapped a clinician user journey and defined an MVP requirement set for a
+      simulated healthcare AI evaluation workflow.
+    source_claim_ids:
+    - claim_mvp_mapping
+  - id: baseline_claim_project_planning
+    text: Maintained milestones, risks, and scope changes for a time-boxed prototype
+      project and documented trade-off decisions.
+    source_claim_ids:
+    - claim_project_planning
+- entity_id: project_traceable_pipeline
+  title: Traceable Application Content Pipeline
+  organization: Example Engineering Project
+  bullets:
+  - id: baseline_claim_python_pipeline
+    text: Built a Python workflow that converts structured evidence into traceable
+      application-ready content and audit artifacts.
+    source_claim_ids:
+    - claim_python_pipeline
+- entity_id: exp_scientific_communication
+  title: Biomedical Research Trainee
+  organization: Example Medical University
+  bullets:
+  - id: baseline_claim_scientific_communication
+    text: Synthesized biomedical literature into structured presentations and concise
+      evidence summaries for research discussions.
+    source_claim_ids:
+    - claim_scientific_communication
+- entity_id: exp_data_insights
+  title: Clinical Data Analysis Intern
+  organization: Example Health Analytics Team
+  bullets:
+  - id: baseline_claim_data_analysis_4800
+    text: Cleaned and analyzed 4,800 fictional de-identified records to identify usage
+      patterns and summarize actionable findings.
+    source_claim_ids:
+    - claim_data_analysis_4800
+  - id: baseline_claim_cross_functional
+    text: Coordinated clinical, engineering, and design teammates around shared requirements,
+      decision logs, and handoff issues.
+    source_claim_ids:
+    - claim_cross_functional

@@ -6,20 +6,36 @@ on:
     paths:
       - "src/evidence_grounded_resume_agent/retrieval.py"
       - "src/evidence_grounded_resume_agent/retrieval_evaluation.py"
+      - "src/evidence_grounded_resume_agent/tools.py"
+      - "src/evidence_grounded_resume_agent/profile.py"
+      - "examples/fictional_profile.yaml"
       - "examples/retrieval_benchmark.yaml"
+      - "scripts/summarize_benchmarks.py"
       - "pyproject.toml"
       - ".github/workflows/semantic-benchmark.yml"
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-paraphrase-multilingual-minilm-l12-v2
       - run: python -m pip install --upgrade pip
       - run: pip install -e ".[embedding]"
+      - name: Run lexical benchmark
+        run: |
+          resume-agent benchmark-retrieval \
+            --profile examples/fictional_profile.yaml \
+            --benchmark examples/retrieval_benchmark.yaml \
+            --retriever lexical \
+            --output outputs/lexical_benchmark.json
       - name: Run embedding benchmark
         run: |
           resume-agent benchmark-retrieval \
@@ -34,13 +50,14 @@ jobs:
             --benchmark examples/retrieval_benchmark.yaml \
             --retriever hybrid \
             --output outputs/hybrid_benchmark.json
-      - name: Print benchmark results
+      - name: Summarize
         run: |
-          cat outputs/embedding_benchmark.json
-          cat outputs/hybrid_benchmark.json
+          python scripts/summarize_benchmarks.py \
+            --lexical outputs/lexical_benchmark.json \
+            --embedding outputs/embedding_benchmark.json \
+            --hybrid outputs/hybrid_benchmark.json \
+            --output outputs/retrieval_benchmark_summary.json
       - uses: actions/upload-artifact@v4
         with:
           name: semantic-retrieval-benchmark
-          path: |
-            outputs/embedding_benchmark.json
-            outputs/hybrid_benchmark.json
+          path: outputs/*.json
